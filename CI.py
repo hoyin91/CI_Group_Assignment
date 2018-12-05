@@ -4,6 +4,7 @@ class Population:
 
     # generate population by the popSize
     def __init__(self, popSize):
+        self.popSize = popSize
         self.pop = []
         for _ in range(popSize):
             self.ind = Individual()
@@ -23,9 +24,23 @@ class Population:
         self.pop[indIndex] = self.ind.getIndividualGene()
 
     def getIndividual(self,index):
-        return self.pop[index]
+        if index <= self.popSize:
+            return self.pop[index]
 
+    # not done yet
+    def getFittest(self):
+        # Loop through individuals to find fittest
+        fittest = self.pop[0]
+        print (fittest)
+        for _ in range(self.popSize):
+            if (fittest.getFitness() <= self.getIndividual(_).getFitness()):
+                fittest = self.getIndividual(_)
+        
+        return fittest;
 
+    # not done yet
+    def getFitness(self):
+        return 1.0
 
 class Individual:
 
@@ -38,8 +53,11 @@ class Individual:
         self.ind = [self.gene1, self.gene2, self.gene3, self.gene4]
 
     # return individual array
-    def getIndividualGene(self):
-        return self.ind
+    def getIndividualGene(self,index=99):
+        if index == 99:
+            return self.ind
+        else:
+            return self.ind[index]
 
     # set Individual gene value
     def setIndividualGene(self, valueArray):
@@ -57,6 +75,5 @@ print (abc.getPopulation())
 abc.setPopulationGene(1,[1.2,1.3,1.5,1.7]) #set the particular ind with the gene value
 print ("Population fitness after changing gene value")
 print (abc.getPopulation()) #print population index
-
 print (abc.getIndividual(1))
-
+print (abc.getIndividual(100))
