@@ -51,7 +51,7 @@ public class Algorithm {
 
     // Crossover individuals
     private static Individual crossover(Individual indiv1, Individual indiv2) {
-        Individual newSol = new WeldedBeamIndividual();
+        Individual newSol = Helper.GetIndividual();
         
         double a = Math.random();
         double b = 1 - Math.random();
@@ -64,7 +64,7 @@ public class Algorithm {
     }
     //1-point crossover
     private static Individual crossover2(Individual indiv1, Individual indiv2){
-        Individual newSol = new WeldedBeamIndividual();
+        Individual newSol = Helper.GetIndividual();
         
         int point = (int) ((Math.random()*0.7 + 0.2) * (newSol.size() - 1));
         
