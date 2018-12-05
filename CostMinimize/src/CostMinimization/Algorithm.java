@@ -52,9 +52,12 @@ public class Algorithm {
     // Crossover individuals
     private static Individual crossover(Individual indiv1, Individual indiv2) {
         Individual newSol = Helper.GetIndividual();
-        
-        double a = Math.random();
-        double b = 1 - Math.random();
+        double a;
+        if (indiv1.getFitness() > indiv2.getFitness())
+            a = 0.7;
+        else
+            a = 0.3;
+        double b = 1 - a;
         // Loop through genes
         for (int i = 0; i < indiv1.size(); i++) {
             // Crossover
@@ -83,10 +86,12 @@ public class Algorithm {
     // Mutate an individual
     private static void mutate(Individual indiv) {
         // Loop through genes
+        indiv.setStepSize(Math.random() * indiv.getStepSize());
+        
         for (int i = 0; i < indiv.size(); i++) {
             if (Math.random() <= mutationRate) {
                 // Create random gene
-                double random = Helper.GenerateRandom(0, 2)*indiv.getGene(i);
+                double random = indiv.getStepSize()*indiv.getGene(i);
                 indiv.setGene(i, random);
             }
         }

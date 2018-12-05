@@ -7,7 +7,7 @@ public class GA {
         //Set Problem
         Helper.problem = Problem.WELDED_BEAM;
         // Create an initial population
-        Population myPop = new Population(24, true);
+        Population myPop = new Population(1000, true);
         
         
         // Evolve our population until we reach an optimum solution
@@ -18,7 +18,7 @@ public class GA {
             generationCount++;
             //myPop.getFittest().getFitness();
             myPop = Algorithm.evolvePopulation(myPop);
-            System.out.println("Generation: " + generationCount + " Fittest: " + Math.floor(myPop.getFittest().getFitness()*100)/100 + " Genes: " + myPop.getFittest());
+            System.out.println("Generation: " + generationCount + " Fittest: " + Math.floor(myPop.getFittest().getFitness()*10000)/10000 + " Genes: " + myPop.getFittest());
             
         }
         String mapping = "";
@@ -30,14 +30,14 @@ public class GA {
         System.out.println("Selected project:");
         for (int i=0; i < myPop.getFittest().size(); i++){
                 if (i == 0)
-                    mapping = "2";
+                    mapping = "L";
                 if (i == 1)
-                    mapping = "3";
+                    mapping = "d";
                 if (i == 2)
-                    mapping = "1";
+                    mapping = "w";
                 if (i == 3)
-                    mapping = "4";
-                System.out.print("x" + mapping + ":");
+                    mapping = "h";
+                System.out.print(mapping + ":");
                 System.out.print(myPop.getFittest().getGene(i));
                 System.out.print(", ");
         }
