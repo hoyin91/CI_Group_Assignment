@@ -7,7 +7,7 @@ class Population:
         self.pop = []
         for _ in range(popSize):
             self.ind = Individual()
-            self.generatePopulation(self.ind.getIndividual())
+            self.generatePopulation(self.ind.getIndividualGene())
 
     # generate population (array)
     def generatePopulation(self,ind):
@@ -19,8 +19,11 @@ class Population:
 
     # set the gene of particular individual from the population
     def setPopulationGene(self,indIndex, arrayGene):
-        self.pop[indIndex] = self.ind.setIndividual(arrayGene)
-        self.pop[indIndex] = self.ind.getIndividual()
+        self.pop[indIndex] = self.ind.setIndividualGene(arrayGene)
+        self.pop[indIndex] = self.ind.getIndividualGene()
+
+    def getIndividual(self,index):
+        return self.pop[index]
 
 
 
@@ -35,16 +38,17 @@ class Individual:
         self.ind = [self.gene1, self.gene2, self.gene3, self.gene4]
 
     # return individual array
-    def getIndividual(self):
+    def getIndividualGene(self):
         return self.ind
 
     # set Individual gene value
-    def setIndividual(self, valueArray):
+    def setIndividualGene(self, valueArray):
         self.gene1 = valueArray[0]
         self.gene2 = valueArray[1]
         self.gene3 = valueArray[2]
         self.gene4 = valueArray[3]
         self.ind = [self.gene1, self.gene2, self.gene3, self.gene4]
+
 
 
 abc = Population(10) #init population with size of 10
@@ -54,4 +58,5 @@ abc.setPopulationGene(1,[1.2,1.3,1.5,1.7]) #set the particular ind with the gene
 print ("Population fitness after changing gene value")
 print (abc.getPopulation()) #print population index
 
+print (abc.getIndividual(1))
 
