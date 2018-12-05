@@ -24,7 +24,7 @@ public class Population {
         if (initialise) {
             // Loop and create individuals
             for (int i = 0; i < size(); i++) {
-                Individual newIndividual = new WeldedBeamIndividual();
+                Individual newIndividual = Helper.GetIndividual();
                 newIndividual.generateIndividual();
                 saveIndividual(i, newIndividual);
             }

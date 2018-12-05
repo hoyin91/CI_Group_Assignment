@@ -1,13 +1,14 @@
 package CostMinimization;
 
-import java.math.BigDecimal;
-
 public class GA {
 
     public static void main(String[] args) {
 
+        //Set Problem
+        Helper.problem = Problem.WELDED_BEAM;
         // Create an initial population
-        Population myPop = new Population(1000, true);
+        Population myPop = new Population(24, true);
+        
         
         // Evolve our population until we reach an optimum solution
         int generationCount = 0;
@@ -24,7 +25,6 @@ public class GA {
         //System.out.println("Generation: " + generationCount + " Fittest: " + myPop.getFittest().getFitness());
         System.out.println("Solution found!");
         System.out.println("Generation: " + generationCount);
-        System.out.println("Fitness evaluated: " + FitnessCalc.fitnessEvaluated);
         System.out.println("Genes:");
         System.out.println(myPop.getFittest());
         System.out.println("Selected project:");
