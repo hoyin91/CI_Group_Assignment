@@ -39,10 +39,10 @@ class Population:
         return fittest;
 
     def getFitness(self,index):
-    	if index <= self.popSize:
+        if index <= self.popSize:
             target = self.getIndividual(index)
-
-        fitness = ((1.10471*target.getLength*2*target.getDepth)+(0.04811*target.getThickness*target.getWidth*(14.0+target.getDepth)))
+        
+        fitness = (1.10471*target.getLength()*2*target.getDepth()) + ((0.04811*target.getThickness()*target.getWidth()*(14.0+target.getDepth())))
         return fitness
 
 
