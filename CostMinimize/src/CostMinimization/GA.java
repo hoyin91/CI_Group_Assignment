@@ -5,9 +5,9 @@ public class GA {
     public static void main(String[] args) {
 
         //Set Problem
-        Helper.problem = Problem.WELDED_BEAM;
+        Helper.problem = Problem.COMPRESSION_DESIGN;
         // Create an initial population
-        Population myPop = new Population(1000, true);
+        Population myPop = new Population(50, true);
         
         
         // Evolve our population until we reach an optimum solution
@@ -18,7 +18,7 @@ public class GA {
             generationCount++;
             //myPop.getFittest().getFitness();
             myPop = Algorithm.evolvePopulation(myPop);
-            System.out.println("Generation: " + generationCount + " Fittest: " + Math.floor(myPop.getFittest().getFitness()*10000)/10000 + " Genes: " + myPop.getFittest());
+            System.out.println("Generation: " + generationCount + " Fittest: " + 1/myPop.getFittest().getFitness() + " Genes: " + myPop.getFittest());
             
         }
         String mapping = "";
@@ -32,9 +32,9 @@ public class GA {
                 if (i == 0)
                     mapping = "L";
                 if (i == 1)
-                    mapping = "d";
-                if (i == 2)
                     mapping = "w";
+                if (i == 2)
+                    mapping = "d";
                 if (i == 3)
                     mapping = "h";
                 System.out.print(mapping + ":");

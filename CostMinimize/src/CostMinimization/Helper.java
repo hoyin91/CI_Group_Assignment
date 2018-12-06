@@ -12,7 +12,7 @@ package CostMinimization;
 public class Helper {
     public static Problem problem;
     public static double GenerateRandom(double min, double max){
-        return (Math.random() * ((max - min) + 1)) + min;
+        return (Math.random() * (max - min)) + min;
     }
     
     public static double root(double base, double n){

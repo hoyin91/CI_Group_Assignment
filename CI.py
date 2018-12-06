@@ -35,11 +35,11 @@ class Individual:
         self.gene2 = 0.0
         self.gene3 = 0.0
         self.gene4 = 0.0
-        self.ind = [self.gene1, self.gene2, self.gene3, self.gene4]
+        self.genes = [self.gene1, self.gene2, self.gene3, self.gene4]
 
     # return individual array
     def getIndividualGene(self):
-        return self.ind
+        return self.genes
 
     # set Individual gene value
     def setIndividualGene(self, valueArray):
@@ -47,7 +47,7 @@ class Individual:
         self.gene2 = valueArray[1]
         self.gene3 = valueArray[2]
         self.gene4 = valueArray[3]
-        self.ind = [self.gene1, self.gene2, self.gene3, self.gene4]
+        self.genes = [self.gene1, self.gene2, self.gene3, self.gene4]
 
 
 
@@ -59,4 +59,6 @@ print ("Population fitness after changing gene value")
 print (abc.getPopulation()) #print population index
 
 print (abc.getIndividual(1))
+
+print (abc.genes)
 
