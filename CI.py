@@ -9,7 +9,6 @@ class Population:
         for _ in range(popSize):
             self.ind = Individual()
             self.generatePopulation(self.ind)
-            #self.generatePopulation(self.ind.getIndividualGene())
 
     # generate population (array)
     def generatePopulation(self,ind):
@@ -28,7 +27,6 @@ class Population:
         if index <= self.popSize:
             return self.pop[index]
 
-    # not done yet
     def getFittest(self):
         # Loop through individuals to find fittest
         fittest = self.getIndividual(0)
