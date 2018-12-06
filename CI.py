@@ -1,5 +1,8 @@
 import random
 
+recombinationVar = 0.7
+popSize = 30
+
 class Population:
 
     # generate population by the popSize
@@ -43,6 +46,10 @@ class Population:
         fitness = (1.10471*target.getLength()*2*target.getDepth()) + ((0.04811*target.getThickness()*target.getWidth()*(14.0+target.getDepth())))
         return fitness
 
+    def getParent(self):
+        index = random.randint(0,(popSize-1))
+        return self.getIndividual(index)
+
 
 class Individual:
 
@@ -56,11 +63,8 @@ class Individual:
 
 
     # return individual array
-    def getIndividualGene(self,index=99):
-        if index == 99:
-            return self.ind
-        else:
-            return self.ind[index]
+    def getIndividualGene(self,index):
+        return self.ind[index]
 
     # set Individual gene value
     def setIndividualGene(self, valueArray):
@@ -68,7 +72,19 @@ class Individual:
         self.length = valueArray[1]
         self.depth = valueArray[2]
         self.thickness = valueArray[3]
-        self.ind = [self.width, self.length, self.depth, self.thickness]    
+        self.ind = [self.width, self.length, self.depth, self.thickness]
+
+    def setParticularGene(self,index,value):
+        if index == 0:
+            self.width = value
+        elif index == 1:
+            self.length = value
+        elif index == 2:
+            self.depth = value
+        elif index == 3:
+            self.thickness = value 
+
+        self.ind = [self.width, self.length, self.depth, self.thickness]
 
     def getWidth(self):
         return self.width
@@ -86,11 +102,30 @@ class Individual:
         fitness = (1.10471*self.getLength()*2*self.getDepth()) + ((0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth())))
         return fitness
 
+def simpleArithmeticCrossover(parent1,parent2):
+    child1 = Individual()
+    child2 = Individual()
+    genePosition=random.randint(0,3)
+    print("geneposition is",genePosition)
+    for x in range(4):
+        if x >= genePosition:
+            geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
+            geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
+            print("recom1 = ",geneValue1)
+            print("recom2 = ",geneValue2)
+            child1.setParticularGene(x,geneValue1)
+            child2.setParticularGene(x,geneValue2)
+        else:
+            child1.setParticularGene(x,parent1.getIndividualGene(x))
+            child2.setParticularGene(x,parent2.getIndividualGene(x))
+    
+    for i in range(4):
+        print("parent = ",parent1.ind[i])
+        print("child = ",child1.ind[i])
 
-
-abc = Population(30) #init population with size of 10
+abc = Population(popSize) #init population with size of 10
 #print(abc.getIndividual(10).getWidth())
 print (abc.getFittest().getFitness())
 #print(abc.getFitness(10))
 #print(abc.getIndividual(10).getWidth)
-
+simpleArithmeticCrossover(abc.getParent(),abc.getParent())
