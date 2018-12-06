@@ -36,6 +36,7 @@ class Population:
         
         return fittest;
 
+    # we don't need this??? I have implement another 1 at the individual class to get the value
     def getFitness(self,index):
         if index <= self.popSize:
             target = self.getIndividual(index)
@@ -82,9 +83,15 @@ class Individual:
     def getDepth(self):
         return self.depth
 
+    def getFitness(self):
+        fitness = (1.10471*self.getLength()*2*self.getDepth()) + ((0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth())))
+        return fitness
+
+
 
 abc = Population(30) #init population with size of 10
-print(abc.getIndividual(10).getWidth())
-print(abc.getFitness(10))
+#print(abc.getIndividual(10).getWidth())
+print (abc.getFittest().getFitness())
+#print(abc.getFitness(10))
 #print(abc.getIndividual(10).getWidth)
 
