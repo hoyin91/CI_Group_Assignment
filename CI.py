@@ -84,10 +84,6 @@ class Individual:
     def getDepth(self):
         return self.depth
 
-    def getFitness(self):
-        # return ur value at here
-        return 1.0
-
 
 abc = Population(30) #init population with size of 10
 print(abc.getIndividual(10).getWidth())
