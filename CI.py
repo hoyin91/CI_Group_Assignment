@@ -66,6 +66,18 @@ class Individual:
         self.gene4 = valueArray[3]
         self.ind = [self.gene1, self.gene2, self.gene3, self.gene4]
 
+    def getWidth():
+        return self.gene1
+
+    def getLength():
+        return self.gene2
+
+    def getThickness():
+        return self.gene3
+
+    def getDepth():
+        return self.gene4
+
     def getFitness(self):
         # return ur value at here
         return 1.0
