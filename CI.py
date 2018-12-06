@@ -43,7 +43,7 @@ class Population:
             target = self.getIndividual(index)
         
         fitness = (1.10471*target.getLength()*2*target.getDepth()) + ((0.04811*target.getThickness()*target.getWidth()*(14.0+target.getDepth())))
-        return fitness
+        return 1/fitness
 
 
 class Individual:
@@ -89,8 +89,9 @@ class Individual:
         return 1.0
 
 
-abc = Population(30) #init population with size of 10
-print(abc.getIndividual(10).getWidth())
-print(abc.getFitness(10))
+popsize = 30
+abc = Population(popsize) #init population with size of 10
+for i in range(popsize):
+    print(abc.getFitness(i))
 #print(abc.getIndividual(10).getWidth)
 
