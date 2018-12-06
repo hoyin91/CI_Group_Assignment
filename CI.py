@@ -36,7 +36,7 @@ class Population:
         
         return fittest;
 
-    def getFitness(self,index):
+    def getParticularIndividualFitness(self,index):
         if index <= self.popSize:
             target = self.getIndividual(index)
         
@@ -82,10 +82,15 @@ class Individual:
     def getDepth(self):
         return self.depth
 
+    def getFitness(self):
+        fitness = (1.10471*self.getLength()*2*self.getDepth()) + ((0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth())))
+        return fitness
+
+
 
 popsize = 30
 abc = Population(popsize) #init population with size of 10
 for i in range(popsize):
     print(abc.getFitness(i))
-#print(abc.getIndividual(10).getWidth)
+
 
