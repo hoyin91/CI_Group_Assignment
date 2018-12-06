@@ -32,7 +32,6 @@ class Population:
     def getFittest(self):
         # Loop through individuals to find fittest
         fittest = self.getIndividual(0)
-        print (fittest)
         for _ in range(self.popSize):
             if (fittest.getFitness() <= self.getIndividual(_).getFitness()):
                 fittest = self.getIndividual(_)
@@ -42,8 +41,7 @@ class Population:
     def getFitness(self,index):
     	if index <= self.popSize:
     		target = self.getIndividual(index)
-    		print(target.getWidth)
-    	fitness = (1.10471 * target.length * 2 * target.depth)+(0.04811 * target.thickness * target.width *(14.0+target.depth))
+        #fitness = (1.10471 * target.length * 2 * target.depth)+(0.04811 * target.thickness * target.width *(14.0+target.depth))
     	return target
 
 
@@ -73,16 +71,16 @@ class Individual:
         self.thickness = valueArray[3]
         self.ind = [self.width, self.length, self.depth, self.thickness]    
 
-    def getWidth():
+    def getWidth(self):
         return self.width
 
-    def getLength():
+    def getLength(self):
         return self.length
 
-    def getThickness():
+    def getThickness(self):
         return self.thickness
 
-    def getDepth():
+    def getDepth(self):
         return self.depth
 
     def getFitness(self):
@@ -91,7 +89,7 @@ class Individual:
 
 
 abc = Population(30) #init population with size of 10
-print(abc.getIndividual(10).width)
+print(abc.getIndividual(10).getWidth())
 print(abc.getFitness(10))
 #print(abc.getIndividual(10).getWidth)
 
