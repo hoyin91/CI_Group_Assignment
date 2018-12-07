@@ -6,15 +6,16 @@ popSize = 30
 class Population:
 
     # generate population by the popSize
-    def __init__(self, popSize):
+    def __init__(self, popSize,init):
         self.popSize = popSize
         self.pop = []
-        for _ in range(popSize):
-            self.ind = Individual()
-            self.generatePopulation(self.ind)
+        if init:
+            for _ in range(popSize):
+                self.ind = Individual()
+                self.insertPopulation(self.ind)
 
     # generate population (array)
-    def generatePopulation(self,ind):
+    def insertPopulation(self,ind):
         self.pop.append(ind)
         
     # return population (Array of float)
@@ -46,7 +47,7 @@ class Population:
         return target.getFitness()
 
     def getParent(self):
-        index = random.randint(0,(popSize-1))
+        index = random.randint(0,(self.popSize-1))
         return self.getIndividual(index)
 
 
@@ -151,11 +152,6 @@ def simpleArithmeticCrossover(parent1,parent2):
         else:
             child1.setParticularGene(x,parent1.getIndividualGene(x))
             child2.setParticularGene(x,parent2.getIndividualGene(x))
-    
-    print (parent1.getIndividualGeneArray())
-    print (parent2.getIndividualGeneArray())
-    print (child1.getIndividualGeneArray())
-    print (child2.getIndividualGeneArray())
 
     # return both children
     return child1,child2
@@ -176,13 +172,24 @@ def Mutation(parent):
     # return mutated child
     return child
 
+def main():
+    popSize = 30
+    pop = Population(popSize,1)
+    for y in range(100):
+        newPop = Population(popSize,0)
+        for x in range(int(popSize/2)):
+            parent1 = pop.getParent()
+            parent2 = pop.getParent()
+            child1 = Individual()
+            child2 = Individual()
+            child1,child2 = simpleArithmeticCrossover(parent1,parent2)
+            Mutation(child1)
+            Mutation(child2)
+            newPop.insertPopulation(child1)
+            newPop.insertPopulation(child2)
+        else:
+            # replace the entire population with newly generated children
+            pop = newPop
 
-
-abc = Population(popSize) #init population with size of 10
-#print(abc.getIndividual(10).getWidth())
-#print (abc.getFittest().getFitness())
-#print(abc.getFitness(10))
-#print(abc.getIndividual(10).getWidth)
-#simpleArithmeticCrossover(abc.getParent(),abc.getParent())
-print (abc.getParticularIndividualFitness(1))
-Mutation(abc.getParent())
+main()
+    
