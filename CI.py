@@ -43,8 +43,8 @@ class Population:
         if index <= self.popSize:
             target = self.getIndividual(index)
         
-        fitness = (1.10471*target.getLength()*2*target.getDepth()) + ((0.04811*target.getThickness()*target.getWidth()*(14.0+target.getDepth())))
-        return fitness
+        #fitness = (1.10471*target.getLength()*2*target.getDepth()) + ((0.04811*target.getThickness()*target.getWidth()*(14.0+target.getDepth())))
+        return target.getFitness()
 
     def getParent(self):
         index = random.randint(0,(popSize-1))
@@ -55,10 +55,18 @@ class Individual:
 
     # Init gene with random value, each individual has 4 genes
     def __init__(self):
-        self.width = random.uniform(0.1,5) #assign to random.random() for random float (0.0 - 1.0)
-        self.length = random.uniform(0.01,10)
-        self.depth = random.uniform(0.1,2)
-        self.thickness = random.uniform(0.01,2)
+        # init constraint of each parameter
+        self.MAXWIDTH = 1.5
+        self.MAXTHICKNESS = 10
+        self.MAXLENGTH = 2
+        self.MAXDEPTH = 2
+
+        self.violation = False
+
+        self.width = random.uniform(0.1,self.MAXWIDTH) #assign to random.random() for random float (0.0 - 1.0)
+        self.length = random.uniform(0.01,self.MAXLENGTH)
+        self.depth = random.uniform(0.1,self.MAXDEPTH)
+        self.thickness = random.uniform(0.01,self.MAXTHICKNESS)
         self.ind = [self.width, self.length, self.depth, self.thickness]
 
     # get the gene array size
@@ -89,25 +97,43 @@ class Individual:
         elif index == 2:
             self.depth = value
         elif index == 3:
-            self.thickness = value 
+            self.thickness = value
 
         self.ind = [self.width, self.length, self.depth, self.thickness]
 
     def getWidth(self):
+        if self.width > self.MAXWIDTH:
+            self.violation = True
         return self.width
 
     def getLength(self):
+        if self.length > self.MAXLENGTH:
+            self.violation = True
         return self.length
 
     def getThickness(self):
+        if self.thickness > self.MAXTHICKNESS:
+            self.violation = True
         return self.thickness
 
     def getDepth(self):
+        if self.depth > self.MAXDEPTH:
+            self.violation = True
         return self.depth
 
     def getFitness(self):
+
         fitness = (1.10471*self.getLength()*2*self.getDepth()) + ((0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth())))
-        return fitness
+
+        # if any parameter violate, return 0.0 directly
+        if self.violation:
+            # reset the violation flag
+            self.violation = False
+            return 0.0
+        else:
+            return fitness
+
+
 
 def simpleArithmeticCrossover(parent1,parent2):
     child1 = Individual()
@@ -132,11 +158,14 @@ def simpleArithmeticCrossover(parent1,parent2):
     print (child1.getIndividualGeneArray())
     print (child2.getIndividualGeneArray())
 
+    # return both children
+    return child1,child2
+
 def Mutation(parent):
     # Init child1 as parent to undergo mutation
     child = parent
 
-    #print (child.getIndividualGeneArray())
+    # print (child.getIndividualGeneArray())
     for _ in range(child.getGeneSize()):
         MutationRate = random.random()
         if (MutationRate > 0.5): # do mutation if and only if the mutation rate is higher than 0.5
@@ -144,7 +173,8 @@ def Mutation(parent):
             RandomgeneValue = random.random() * 2
             child.setParticularGene(_, RandomgeneValue)
 
-    #print (child.getIndividualGeneArray())
+    # print (child.getIndividualGeneArray())
+    # return mutated child
     return child
 
 
@@ -155,4 +185,5 @@ abc = Population(popSize) #init population with size of 10
 #print(abc.getFitness(10))
 #print(abc.getIndividual(10).getWidth)
 #simpleArithmeticCrossover(abc.getParent(),abc.getParent())
-print(Mutation(abc.getParent()))
+print (abc.getParticularIndividualFitness(1))
+Mutation(abc.getParent())
