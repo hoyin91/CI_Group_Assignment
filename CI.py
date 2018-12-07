@@ -141,7 +141,6 @@ def simpleArithmeticCrossover(parent1,parent2):
     child2 = Individual()
 
     genePosition=random.randint(0,child1.getGeneSize()-1) # take in size of gene from variable
-    print("geneposition is",genePosition)
     for x in range(child1.getGeneSize()):
         if x >= genePosition:
             geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
