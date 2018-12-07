@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 recombinationVar = 0.7
 popSize = 30
@@ -157,11 +158,18 @@ def simpleArithmeticCrossover(parent1,parent2):
 def Mutation(parent):
     # Init child1 as parent to undergo mutation
     child = parent
+    ProbOfMutation = random.random()
+    c = random.uniform(0.8,1.0)
+
+    # init mu and sigma
+    mu,sigma = 0,0.1
+
+    s = np.random.normal(mu, sigma, 1000)
 
     # print (child.getIndividualGeneArray())
     for _ in range(child.getGeneSize()):
         MutationRate = random.random()
-        if (MutationRate > 0.5): # do mutation if and only if the mutation rate is higher than 0.5
+        if (MutationRate > 0.5): # perform mutation if and only if the mutation rate is higher than 0.5
             #print ("MR: {} Gene @ {}: to geneVal: {}".format(MutationRate,_,child.getIndividualGene(_)))
             RandomgeneValue = random.random() * 2
             child.setParticularGene(_, RandomgeneValue)
@@ -189,5 +197,7 @@ def main():
             # replace the entire population with newly generated children
             pop = newPop
 
-main()
-    
+#main()
+abc = Population(2,1)
+Mutation(abc.getParent())
+
