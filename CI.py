@@ -124,17 +124,47 @@ class Individual:
         return self.depth
 
     def getFitness(self):
-
-        fitness = (1.10471*self.getLength()*2*self.getDepth()) + ((0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth())))
-
+        checkConstraint()
+        
         # if any parameter violate, return 0.0 directly
         if self.violation:
             # reset the violation flag
             self.violation = False
             return 0.0
         else:
+            fitness = (1.10471*self.getLength()*2*self.getDepth()) + ((0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth())))
             return fitness
 
+    def checkConstraint(self):
+        H=self.getWidth()
+        W=self.getLength()
+        L=self.getDepth()
+        D=self.getThickness()
+        ax=(504000/(h*d**2))
+        q=6000*(14+(L/2))
+        d=(1/2)*(sqrt((L**2)+(W+D)**2))
+        j=sqrt(2)*W*L*(((L**2)/2)+(((W+D)**2)/2))
+        sx=(65856/((30000)*H*(D**3)))
+        b=(q*D)/j
+        a=6000/(sqrt(2)*W*L)
+        tx= sqrt((a**2)+((a*b*L)/D)+(b**2))
+        px=0.61423*((10**6)*D*(H**3)/6)*(1-((30/48)**(1/d)/28))
+
+
+        if w - h >= 0 :
+            self.violation=True
+        elif sx - 0.25 >=0:
+            self.violation=True
+        elif tx - 13600>=0:
+            self.violation=True
+        elif ax - 30000 >= 0:
+            self.violation = True
+        elif (0.10471*(W**2)) + (0.04811*H*D*(14+L)) - 5 >= 0:
+            self.violation = True
+        elif 0.125 - W >= 0:
+            self.violation = True
+        elif 6000 - px >= 0:
+            self.violation = True
 
 
 def simpleArithmeticCrossover(parent1,parent2):
