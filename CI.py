@@ -61,6 +61,13 @@ class Individual:
         self.thickness = random.uniform(0.01,2)
         self.ind = [self.width, self.length, self.depth, self.thickness]
 
+    # get the gene array size
+    def getGeneSize(self):
+        return len(self.ind)
+
+    # get the individual array directly
+    def getIndividualGeneArray(self):
+        return self.ind
 
     # return individual array
     def getIndividualGene(self,index):
@@ -105,9 +112,10 @@ class Individual:
 def simpleArithmeticCrossover(parent1,parent2):
     child1 = Individual()
     child2 = Individual()
-    genePosition=random.randint(0,3)
+
+    genePosition=random.randint(0,child1.getGeneSize()-1) # take in size of gene from variable
     print("geneposition is",genePosition)
-    for x in range(4):
+    for x in range(child1.getGeneSize()):
         if x >= genePosition:
             geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
             geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
@@ -119,13 +127,32 @@ def simpleArithmeticCrossover(parent1,parent2):
             child1.setParticularGene(x,parent1.getIndividualGene(x))
             child2.setParticularGene(x,parent2.getIndividualGene(x))
     
-    for i in range(4):
-        print("parent = ",parent1.ind[i])
-        print("child = ",child1.ind[i])
+    print (parent1.getIndividualGeneArray())
+    print (parent2.getIndividualGeneArray())
+    print (child1.getIndividualGeneArray())
+    print (child2.getIndividualGeneArray())
+
+def Mutation(parent):
+    # Init child1 as parent to undergo mutation
+    child = parent
+
+    #print (child.getIndividualGeneArray())
+    for _ in range(child.getGeneSize()):
+        MutationRate = random.random()
+        if (MutationRate > 0.5): # do mutation if and only if the mutation rate is higher than 0.5
+            #print ("MR: {} Gene @ {}: to geneVal: {}".format(MutationRate,_,child.getIndividualGene(_)))
+            RandomgeneValue = random.random() * 2
+            child.setParticularGene(_, RandomgeneValue)
+
+    #print (child.getIndividualGeneArray())
+    return child
+
+
 
 abc = Population(popSize) #init population with size of 10
 #print(abc.getIndividual(10).getWidth())
-print (abc.getFittest().getFitness())
+#print (abc.getFittest().getFitness())
 #print(abc.getFitness(10))
 #print(abc.getIndividual(10).getWidth)
-simpleArithmeticCrossover(abc.getParent(),abc.getParent())
+#simpleArithmeticCrossover(abc.getParent(),abc.getParent())
+print(Mutation(abc.getParent()))
