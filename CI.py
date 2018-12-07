@@ -135,6 +135,7 @@ class Individual:
             return fitness
 
 
+
 def simpleArithmeticCrossover(parent1,parent2):
     child1 = Individual()
     child2 = Individual()
@@ -145,8 +146,6 @@ def simpleArithmeticCrossover(parent1,parent2):
         if x >= genePosition:
             geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
             geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
-            print("recom1 = ",geneValue1)
-            print("recom2 = ",geneValue2)
             child1.setParticularGene(x,geneValue1)
             child2.setParticularGene(x,geneValue2)
         else:
