@@ -60,10 +60,10 @@ class Individual:
         self.MAXTHICKNESS = 10
         self.MAXLENGTH = 2
         self.MAXDEPTH = 2
+        self.violation = False # Flag to indicate violation of constraint
 
-        self.violation = False
-
-        self.width = random.uniform(0.1,self.MAXWIDTH) #assign to random.random() for random float (0.0 - 1.0)
+        #assign to random.random() for random float (0.0 - 1.0)
+        self.width = random.uniform(0.1,self.MAXWIDTH)
         self.length = random.uniform(0.01,self.MAXLENGTH)
         self.depth = random.uniform(0.1,self.MAXDEPTH)
         self.thickness = random.uniform(0.01,self.MAXTHICKNESS)
