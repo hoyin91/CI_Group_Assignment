@@ -7,7 +7,7 @@ public class GA {
        // Show each rule (and degree of support)
        Helper.getMutationRate();
         //Set Problem
-        Helper.problem = Problem.PRESSURE_VESSEL;
+        Helper.problem = Problem.WELDED_BEAM;
         // Create an initial population
         Population myPop = new Population(50, true);
         
