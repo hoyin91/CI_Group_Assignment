@@ -5,11 +5,10 @@ public abstract class Individual {
     private double[] genes;
     // Cache
     protected double fitness = -1;
-    protected double stepSize = 0;
+    protected double stepSize = 1;
     
     public final void setGeneLength(int length){
         genes = new double[length];
-        stepSize = Math.random();
     }
     
     // Create a random individual

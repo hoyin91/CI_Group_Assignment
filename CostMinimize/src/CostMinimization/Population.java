@@ -57,5 +57,21 @@ public class Population {
     public void saveIndividual(int index, Individual indiv) {
         individuals[index] = indiv;
     }
+    
+    public double getFitnessMean() {
+        double total = 0;
+        for (int i = 0; i < size(); i++) {
+            total += individuals[i].getFitness();
+        }
+        return total/size();
+    }
+    
+    public double getMean(int index){
+        double total = 0;
+        for (int i = 0; i < size(); i++){
+            total += individuals[i].getGene(index);
+        }
+        return total/size();
+    }
 }
 

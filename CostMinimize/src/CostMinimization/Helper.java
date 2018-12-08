@@ -5,6 +5,10 @@
  */
 package CostMinimization;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import net.sourceforge.jFuzzyLogic.FIS;
+
 /**
  *
  * @author Xiong
@@ -54,5 +58,19 @@ public class Helper {
         }
 
         return Math.sqrt(standardDeviation/length);
+    }
+    
+    public static double getMutationRate(){
+        System.out.println("Working Directory = " +
+              System.getProperty("user.dir"));
+        Path path = FileSystems.getDefault().getPath("test.fcl");
+        FIS fis = FIS.load("C:\\Users\\yitxi\\Documents\\GitHub\\CI_Group_Assignment\\CostMinimize\\src\\CostMinimization\\test.fcl", true); // Load from 'FCL' file
+        //FIS fis = FIS.load(path.toString(), true);
+        fis.setVariable("service", 3); // Set inputs
+        fis.setVariable("food", 7);
+        fis.evaluate(); // Evaluate
+        System.out.println("Output value:" + fis.getVariable("tip").getValue()); // Show output variable
+        
+        return 0;
     }
 }

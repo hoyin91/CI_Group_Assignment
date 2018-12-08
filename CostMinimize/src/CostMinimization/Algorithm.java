@@ -60,7 +60,6 @@ public class Algorithm {
         double b = 1 - a;
         // Loop through genes
         for (int i = 0; i < indiv1.size(); i++) {
-            // Crossover
             newSol.setGene(i, (a*indiv1.getGene(i))+(b*indiv2.getGene(i)));
         }
         return newSol;
@@ -86,11 +85,11 @@ public class Algorithm {
     // Mutate an individual
     private static void mutate(Individual indiv) {
         // Loop through genes
-        indiv.setStepSize(Math.random() * indiv.getStepSize());
-        
         for (int i = 0; i < indiv.size(); i++) {
             if (Math.random() <= mutationRate) {
                 // Create random gene
+                indiv.setStepSize(Math.random() * indiv.getStepSize());
+                //System.out.println(indiv.getStepSize());
                 double random = indiv.getStepSize()*indiv.getGene(i);
                 indiv.setGene(i, random);
             }

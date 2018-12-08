@@ -1,11 +1,13 @@
 package CostMinimization;
 
+
 public class GA {
 
     public static void main(String[] args) {
-
+       // Show each rule (and degree of support)
+       Helper.getMutationRate();
         //Set Problem
-        Helper.problem = Problem.COMPRESSION_DESIGN;
+        Helper.problem = Problem.PRESSURE_VESSEL;
         // Create an initial population
         Population myPop = new Population(50, true);
         
@@ -13,12 +15,12 @@ public class GA {
         // Evolve our population until we reach an optimum solution
         int generationCount = 0;
         //Initial fitness
-        System.out.println("Generation: " + generationCount + " Fittest: " + Math.floor(myPop.getFittest().getFitness()*100)/100 + " Genes: " + myPop.getFittest());
-        for (int i=0;i < 1000; i++) {
+        //System.out.println("Generation: " + generationCount + " Fittest: " + Math.floor(myPop.getFittest().getFitness()*100)/100 + " Genes: " + myPop.getFittest());
+        for (int i=0;i < 500; i++) {
             generationCount++;
             //myPop.getFittest().getFitness();
             myPop = Algorithm.evolvePopulation(myPop);
-            System.out.println("Generation: " + generationCount + " Fittest: " + 1/myPop.getFittest().getFitness() + " Genes: " + myPop.getFittest());
+            System.out.println("Generation: " + generationCount + " Fittest: " + 1/myPop.getFittest().getFitness() + " Mean: " + myPop.getFitnessMean() +  " Genes: " + myPop.getFittest());
             
         }
         String mapping = "";

@@ -11,20 +11,23 @@ package CostMinimization;
  */
 public class CompressionDesignIndividual extends Individual {
 
-    double L;
+    
     double w;
     double d;
+    double L;
     public CompressionDesignIndividual(){
         setGeneLength(3);
     }
     
     @Override
     public void generateIndividual(){
-        setGene(0, Helper.GenerateRandom(2, 15));
-        setGene(1, Helper.GenerateRandom(0.05, 2));
-        setGene(2, Helper.GenerateRandom(0.25, 1.3));
         
-        CheckLimit();
+        do{
+            setGene(0, Helper.GenerateRandom(0.05, 2));
+            setGene(1, Helper.GenerateRandom(0.25, 1.3));
+            setGene(2, Helper.GenerateRandom(2, 15));
+        } while (constraintsViolated());
+
     }
     
     @Override
@@ -39,14 +42,23 @@ public class CompressionDesignIndividual extends Individual {
     public void CheckLimit(){
         Refresh();
         
-        if (L < 2 || L > 15){
-            setGene(0, Helper.GenerateRandom(2, 15));
+        if (w < 0.05){
+            setGene(0, 0.05);
         }
-        if (w < 0.05 || w > 2){
-            setGene(1, Helper.GenerateRandom(0.05, 2));
+        if (w > 2){
+            setGene(0, 2);
         }
-        if (d < 0.25 || d > 1.3){
-            setGene(2, Helper.GenerateRandom(0.25, 0.85));
+        if (d < 0.25){
+            setGene(1, 0.25);
+        }
+        if (d > 1.3){
+            setGene(1, 1.3);
+        }
+        if (L < 2){
+            setGene(2, 2);
+        }
+        if (L > 15){
+            setGene(2, 15);
         }
         
         if (constraintsViolated())
@@ -56,10 +68,10 @@ public class CompressionDesignIndividual extends Individual {
     @Override
     public boolean constraintsViolated(){
         Refresh();
-        double g1x = 1 - ((Math.pow(d,3)*L) / (7178*Math.pow(w,4)));
+        double g1x = 1 - ((Math.pow(d,3)*L) / (71785*Math.pow(w,4)));
         double g2x = 1 - ((140.45*w)/(Math.pow(d, 2)*L));
-        double g3x = ((2*(w+d))/3) - 1;
-        double g4x = ((d*((4*d)-w))/(Math.pow(w,4)*(12566*d-w))) + (1/(5108*Math.pow(w, 2))) - 1;
+        double g3x = ((w+d)/1.5) - 1;
+        double g4x = ((d*((4*d)-w))/(Math.pow(w,3)*((12566*d)-w))) + (1/(5108*Math.pow(w, 2))) - 1;
         
         if (g1x > 0)
             return true;
@@ -75,9 +87,9 @@ public class CompressionDesignIndividual extends Individual {
     }
     
     private void Refresh(){
-        L = getGene(0);
-        w = getGene(1);
-        d = getGene(2);
+        w = getGene(0);
+        d = getGene(1);
+        L = getGene(2);
     }
 
 }

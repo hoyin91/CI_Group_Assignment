@@ -18,18 +18,16 @@ public class WeldedBeamIndividual extends Individual {
     
     public WeldedBeamIndividual(){
         setGeneLength(4);
-        stepSize = Helper.GenerateRandom(1, 2);
     }
     
     @Override
     public void generateIndividual(){
-        
-        setGene(0, Helper.GenerateRandom(0.1, 5));
-        setGene(1, Helper.GenerateRandom(0, 10));
-        setGene(2, Helper.GenerateRandom(0.1, 2));
-        setGene(3, Helper.GenerateRandom(0, 2));
-        
-        CheckLimit();
+        do{
+            setGene(0, Helper.GenerateRandom(0.1, 5));
+            setGene(1, Helper.GenerateRandom(0, 10));
+            setGene(2, Helper.GenerateRandom(0.1, 2));
+            setGene(3, Helper.GenerateRandom(0, 2));
+        }while(constraintsViolated());
     }
     
     @Override
