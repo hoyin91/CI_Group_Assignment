@@ -46,7 +46,6 @@ class Population:
     def getParticularIndividualFitness(self,index):
         if index <= self.popSize:
             target = self.getIndividual(index)
-        #fitness = (1.10471*target.getLength()*2*target.getDepth()) + ((0.04811*target.getThickness()*target.getWidth()*(14.0+target.getDepth())))
         return target.getFitness()
 
     def getParent(self):
@@ -61,17 +60,18 @@ class Individual:
     def __init__(self):
         # init constraint of each parameter
         self.MAXWIDTH = 2.0
-        self.MINTHICKNESS = 10.0
+        self.MAXTHICKNESS = 10.0
         self.MINLENGTH = 0.1
         self.MINDEPTH = 0.1
         self.violation = False # Flag to indicate violation of constraint
 
         #assign to random.random() for random float (0.0 - 1.0)
-        self.width = random.uniform(0.1,self.MAXWIDTH)
-        self.length = random.uniform(self.MINLENGTH,2.0)
-        self.depth = random.uniform(self.MINDEPTH,5.0)
-        self.thickness = random.uniform(self.MINTHICKNESS,100.0)
+        self.width = random.uniform(0.1, self.MAXWIDTH)
+        self.length = random.uniform(self.MINLENGTH,self.width)
+        self.depth = random.uniform(self.MINDEPTH,2.0)
+        self.thickness = random.uniform(0,self.MAXTHICKNESS)
         self.ind = [self.width, self.length, self.depth, self.thickness]
+        #print (self.ind)
 
     # get the gene array size
     def getGeneSize(self):
@@ -106,84 +106,73 @@ class Individual:
         self.ind = [self.width, self.length, self.depth, self.thickness]
 
     def getWidth(self):
-        if self.width >= self.MAXWIDTH:
+        if self.width > self.MAXWIDTH:
             self.violation = True
-            print ("violation Wifdth")
         return self.width
 
     def getLength(self):
-        if self.length <= self.MINLENGTH:
+        if self.length < self.MINLENGTH:
             self.violation = True
-            print ("violation length")
         return self.length
 
     def getThickness(self):
-        if self.thickness <= self.MINTHICKNESS:
+        if self.thickness > self.MAXTHICKNESS:
             self.violation = True
-            print ("violation thick")
         return self.thickness
 
     def getDepth(self):
-        if self.depth <= self.MINDEPTH:
+        if self.depth < self.MINDEPTH:
             self.violation = True
-            print ("violation depth")
         return self.depth
 
     def getFitness(self):
+        fitness = 0.0
         self.checkConstraint()
+
         # if any parameter violate, return 0.0 directly
         if self.violation:
             # reset the violation flag
-            self.violation = False
             return 0.0
         else:
-            print ("No Failure")
-            fitness = (1.10471*self.getLength()*2*self.getDepth()) + ((0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth())))
-            os.system("echo {} >> testing.txt".format(fitness))
+            fitness = (1.10471*(math.pow(self.getLength(),2))*self.getDepth()) + (0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth()))
+            geneString = "h: {} w: {} L:{} d:{} Fitness: {}".format(self.width,self.length,self.depth,self.thickness,fitness)
+            print (geneString)
             return fitness
 
     def checkConstraint(self):
-        H=self.getWidth()
-        W=self.getLength()
+        self.violation = False
+        h=self.getWidth()
+        w=self.getLength()
         L=self.getDepth()
-        D=self.getThickness()
-        print (W,H,L,D)
-        ax=(504000/(H*D**2))
-        q=6000*(14+(L/2))
-        d=(1/2)*(math.sqrt((L**2)+(W+D)**2))
-        j=math.sqrt(2)*W*L*(((L**2)/2)+(((W+D)**2)/2))
-        sx=(65856/((30000)*H*(D**3)))
-        b=(q*D)/j
-        a=6000/(math.sqrt(2)*W*L)
-        tx= math.sqrt((a**2)+((a*b*L)/D)+(b**2))
-        px=0.61423*((10**6)*D*(H**3)/6)*(1-((30/48)**(1/D)/28))
+        d=self.getThickness()
+        #print (W,H,L,D)
+        #geneString = "w: {} h: {} L:{} d:{}".format(w,h,L,d)
+        #os.system("echo {} >> gene.txt".format(geneString))
+        ax = (504000/(h*(math.pow(d,2))))
+        Q = 6000*(14+(L/2))
+        D = (1/2)*(math.sqrt(math.pow(L,2)+math.pow(w+d,2)))
+        J = math.sqrt(2)*w*L*((math.pow(L,2)/6)+(math.pow(w+d,2)/2))
+        sx = 65856/((30000)*h*math.pow(D,3))
+        b = (Q*D)/J
+        a = 6000/(math.sqrt(2)*w*L)
+        tx = math.sqrt(math.pow(a,2)+((a*b*L)/D)+math.pow(b,2))
+        px = 0.61423*(math.pow(10,6))*((d*math.pow(h,3))/6)*(1-(math.pow(30/48,1/d)/28))
 
 
-        if W - H >= 0 :
+        if (w - h) > 0 :
             self.violation=True
-            print ("rule 1")
-            os.system("echo rule1 >> testing.txt")
-        elif sx - 0.25 >=0:
+        elif (sx - 0.25) > 0:
             self.violation=True
-            print ("rule 2")
-        elif tx - 13600>=0:
+        elif (tx - 13600) > 0:
             self.violation=True
-            print ("rule 3")
-        elif ax - 30000 >= 0:
-            print ("rule 4")
+        elif (ax - 30000) > 0:
             self.violation = True
-        elif (0.10471*(W**2)) + (0.04811*H*D*(14+L)) - 5 >= 0:
+        elif ((0.10471*math.pow(w,2)) + (0.04811*h*d*(14+L)) - 5) > 0:
             self.violation = True
-            print ("rule 5")
-            os.system("echo rule5 >> testing.txt")
-        elif 0.125 - W >= 0:
+        elif (0.125 - w) > 0:
             self.violation = True
-            print ("rule 6")
-        elif 6000 - px >= 0:
+        elif (6000 - px) > 0:
             self.violation = True
-            print ("rule 7")
-        else:
-            print ("no failure")
 
 
 def simpleArithmeticCrossover(parent1,parent2):
@@ -193,8 +182,10 @@ def simpleArithmeticCrossover(parent1,parent2):
     genePosition=random.randint(0,child1.getGeneSize()-1) # take in size of gene from variable
     for x in range(child1.getGeneSize()):
         if x >= genePosition:
-            geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
-            geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
+            #geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
+            #geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
+            geneValue2 = parent1.getIndividualGene(x)
+            geneValue1 = parent2.getIndividualGene(x)
             child1.setParticularGene(x,geneValue1)
             child2.setParticularGene(x,geneValue2)
         else:
@@ -213,43 +204,90 @@ def Mutation(parent):
     # init mu and sigma
     mu,sigma = 0,0.1
 
-    s = np.random.normal(mu, sigma, 1000)
 
+    s = np.random.normal(mu, sigma, 1000)
+    #deltasigma = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (bins - mu)**2 / (2 * sigma**2)
+    num = min(10, max(0, random.gauss(0, 1)))
     # print (child.getIndividualGeneArray())
     for _ in range(child.getGeneSize()):
-        MutationRate = random.random()
-        if (MutationRate > 0.5): # perform mutation if and only if the mutation rate is higher than 0.5
-            #print ("MR: {} Gene @ {}: to geneVal: {}".format(MutationRate,_,child.getIndividualGene(_)))
-            # RandomgeneValue = random.random() * 2
-
-            child.setParticularGene(_, RandomgeneValue)
+        RandomgeneValue = child.getIndividualGene(_) + num
+        # print ("MR: {} Gene @ {}: to geneVal: {}".format(MutationRate,_,RandomgeneValue))
+        child.setParticularGene(_, RandomgeneValue)
 
     # print (child.getIndividualGeneArray())
     # return mutated child
     return child
 
 def main():
-    popSize = 30
+    popSize = 50
     pop = Population(popSize,1)
-    for y in range(100):
+    for y in range(1000):
         newPop = Population(popSize,0)
         for x in range(int(popSize/2)):
             parent1 = pop.getParent()
             parent2 = pop.getParent()
-            child1 = Individual()
-            child2 = Individual()
             child1,child2 = simpleArithmeticCrossover(parent1,parent2)
-            #Mutation(child1)
-            #Mutation(child2)
+            Mutation(child1)
+            Mutation(child2)
+            #fitness1 = parent1.getFitness()
+            #fitness2 = parent2.getFitness()
+            fitness3 = child1.getFitness()
+            fitness4 = child2.getFitness()
+            
             newPop.insertPopulation(child1)
             newPop.insertPopulation(child2)
-            print(newPop.getParticularIndividualFitness(x))
+            #os.system("echo \"P1:{} P2:{} C1:{} C2:{}\" >> testing.txt".format(fitness1, fitness2, fitness3, fitness4))
         else:
             # replace the entire population with newly generated children
             pop = newPop
 
 
-main()
-#abc = Population(2,1)
-#Mutation(abc.getParent())
+def validate_checkConstraint():
+    fitness = 0.0
 
+    L = 1.4313509130700104
+    d = 7.25774482387524
+    w = 0.5794571665426457
+    h = 0.6109559551234784
+    #print (W,H,L,D)
+    #geneString = "w: {} h: {} L:{} d:{}".format(w,h,L,d)
+    #os.system("echo {} >> gene.txt".format(geneString))
+    ax = (504000/(h*(math.pow(d,2))))
+    Q = 6000*(14+(L/2))
+    D = (1/2)*(math.sqrt(math.pow(L,2)+math.pow(w+d,2)))
+    J = math.sqrt(2)*w*L*((math.pow(L,2)/6)+(math.pow(w+d,2)/2))
+    sx = 65856/((30000)*h*math.pow(D,3))
+    b = (Q*D)/J
+    a = 6000/(math.sqrt(2)*w*L)
+    tx = math.sqrt(math.pow(a,2)+((a*b*L)/D)+math.pow(b,2))
+    px = 0.61423*(math.pow(10,6))*((d*math.pow(h,3))/6)*(1-(math.pow(30/48,1/d)/28))
+
+
+    if w < 0.1:
+        print ("fail w")
+    elif h > 2.0:
+        print ("fail h")
+    elif d > 10:
+        print ("fail d")
+    elif L < 0.1:
+        print ("fail L")
+    elif (w - h) > 0 :
+        print ("fail rule 1")
+    elif (sx - 0.25) > 0:
+        print ("fail rule 1")
+    elif (tx - 13600) > 0:
+        print ("fail rule 1")
+    elif (ax - 30000) > 0:
+        print ("fail rule 1")
+    elif ((0.10471*math.pow(w,2)) + (0.04811*h*d*(14+L)) - 5) > 0:
+        print ("fail rule 1")
+    elif (0.125 - w) > 0:
+        print ("fail rule 1")
+    elif (6000 - px) > 0:
+        print ("fail rule 1")
+
+    fitness = (1.10471*(math.pow(w,2))*L) + (0.04811*d*h*(14.0+L))
+    return fitness
+
+main()
+#print (validate_checkConstraint())
