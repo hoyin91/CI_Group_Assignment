@@ -22,21 +22,18 @@ public class WeldedBeamIndividual extends Individual {
     
     @Override
     public void generateIndividual(){
-        
-        setGene(0, Helper.GenerateRandom(0.1, 5));
-        setGene(1, Helper.GenerateRandom(0, 10));
-        setGene(2, Helper.GenerateRandom(0.1, 2));
-        setGene(3, Helper.GenerateRandom(0, 2));
-        
-        CheckLimit();
+        do{
+            setGene(0, Helper.GenerateRandom(0.1, 5));
+            setGene(1, Helper.GenerateRandom(0, 10));
+            setGene(2, Helper.GenerateRandom(0.1, 2));
+            setGene(3, Helper.GenerateRandom(0, 2));
+            Helper.generatedIndiv += 1;
+        } while(constraintsViolated());
     }
     
     @Override
     public double getFitness(){
-        L = getGene(0); //x2
-        d = getGene(1); //x3
-        w = getGene(2); //x1
-        h = getGene(3); //x4
+        Refresh();
         
         if (fitness == -1){
             double fx = (1.10471 * Math.pow(w, 2) * L) + (0.04811 * d * h)*(14.0 + L);
@@ -48,18 +45,15 @@ public class WeldedBeamIndividual extends Individual {
     @Override
     public void CheckLimit(){
         
-            L = getGene(0);
-            d = getGene(1);
-            w = getGene(2);
-            h = getGene(3);
+            Refresh();
             if (L <= 0.1)
                 setGene(0, Helper.GenerateRandom(0.1, 5));
             if (d > 10)
-                setGene(1, Helper.GenerateRandom(0, 9));
+                setGene(1, Helper.GenerateRandom(0.01, 9));
             if (w < 0.1)
                 setGene(2, Helper.GenerateRandom(0.1, 2));
             if (h > 2)
-                setGene(2, Helper.GenerateRandom(0, 2));
+                setGene(2, Helper.GenerateRandom(0.01, 2));
         
         if (constraintsViolated()){
             generateIndividual();
@@ -69,10 +63,7 @@ public class WeldedBeamIndividual extends Individual {
     @Override
     public boolean constraintsViolated(){
         
-        L = getGene(0);
-        d = getGene(1);
-        w = getGene(2);
-        h = getGene(3);
+        Refresh();
         
         double ox = 504000 / (h*Math.pow(d, 2));
         double alpha = 6000 / (Math.sqrt(2)*w*L);
@@ -114,6 +105,14 @@ public class WeldedBeamIndividual extends Individual {
             
         
         return false;
+    }
+    
+    private void Refresh()
+    {
+        L = getGene(0);
+        d = getGene(1);
+        w = getGene(2);
+        h = getGene(3);
     }
             
     

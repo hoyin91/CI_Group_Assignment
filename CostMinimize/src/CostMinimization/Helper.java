@@ -5,14 +5,19 @@
  */
 package CostMinimization;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import net.sourceforge.jFuzzyLogic.FIS;
+
 /**
  *
  * @author Xiong
  */
 public class Helper {
     public static Problem problem;
+    public static int generatedIndiv = 0;
     public static double GenerateRandom(double min, double max){
-        return (Math.random() * ((max - min) + 1)) + min;
+        return (Math.random() * (max - min)) + min;
     }
     
     public static double root(double base, double n){
@@ -36,5 +41,41 @@ public class Helper {
         }
         
         return indiv;
+    }
+    
+    public static double calculateSD(double numArray[])
+    {
+        double sum = 0.0, standardDeviation = 0.0;
+        int length = numArray.length;
+
+        for(double num : numArray) {
+            sum += num;
+        }
+
+        double mean = sum/length;
+
+        for(double num: numArray) {
+            standardDeviation += Math.pow(num - mean, 2);
+        }
+
+        return Math.sqrt(standardDeviation/length);
+    }
+    
+    public static double getMutationRate(double genWithImprovement, double genNoImprovement){
+        System.out.println("Working Directory = " +
+              System.getProperty("user.dir"));
+        Path path = FileSystems.getDefault().getPath("test.fcl");
+        FIS fis = FIS.load("C:\\Users\\yitxi\\Documents\\GitHub\\CI_Group_Assignment\\CostMinimize\\src\\CostMinimization\\test.fcl", true); // Load from 'FCL' file
+        //FIS fis = FIS.load(path.toString(), true);
+        fis.setVariable("genNoImprovement", genWithImprovement); // Set inputs
+        fis.setVariable("genWithImprovement", genNoImprovement);
+        fis.evaluate(); // Evaluate
+        System.out.println("Output value:" + fis.getVariable("mutation").getValue()); // Show output variable
+        
+        return fis.getVariable("mutation").getValue();
+    }
+    
+    public static void ToLog(String text){
+        
     }
 }

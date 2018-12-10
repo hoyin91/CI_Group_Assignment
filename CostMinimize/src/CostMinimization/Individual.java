@@ -5,9 +5,11 @@ public abstract class Individual {
     private double[] genes;
     // Cache
     protected double fitness = -1;
+    protected double[] stepSize;
     
     public final void setGeneLength(int length){
         genes = new double[length];
+        stepSize = new double[length];
     }
     
     // Create a random individual
@@ -24,12 +26,19 @@ public abstract class Individual {
         genes[index] = value;
         fitness = -1;
     }
+    
+    public void setStepSize(int index, double mutateStepSize){
+        stepSize[index] = mutateStepSize;
+    }
+    
+    public double getStepSize(int index){
+        return stepSize[index];
+    }
 
     /* Public methods */
     public int size() {
         return genes.length;
     }
-
     
 
     @Override

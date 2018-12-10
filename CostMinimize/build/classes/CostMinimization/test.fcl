@@ -1,0 +1,55 @@
+/*
+	Example: A tip calculation FIS (fuzzy inference system)
+	Calculates tip based on 'servie' and 'food'
+
+	If you want to about this example (and fuzzy logic), please 
+	read Matlab's tutorial on fuzzy logic toolbox 
+	http://www.mathworks.com/access/helpdesk/help/pdf_doc/fuzzy/fuzzy.pdf
+
+									Pablo Cingolani 
+									pcingola@users.sourceforge.net
+*/
+
+FUNCTION_BLOCK tipper	// Block definition (there may be more than one block per file)
+
+VAR_INPUT				// Define input variables
+	genNoImprovement : REAL;
+	genWithImprovement : REAL;
+END_VAR
+
+VAR_OUTPUT				// Define output variable
+	mutation : REAL;
+END_VAR
+
+FUZZIFY genNoImprovement	// Fuzzify input variable 'service': {'poor', 'good' , 'excellent'}
+	TERM low:= (0, 1) (4, 0) ; 
+	TERM medium := (2, 0) (5,1) (8,1) (11,0);
+	TERM high := (10, 0) (20, 1);
+END_FUZZIFY
+
+FUZZIFY genWithImprovement	// Fuzzify input variable 'food': { 'rancid', 'delicious' }
+	TERM low := (0, 1) (1, 1) (6,0) ;
+	TERM high := (5,0) (15,1);
+END_FUZZIFY
+
+DEFUZZIFY mutation			// Defzzzify output variable 'tip' : {'cheap', 'average', 'generous' }
+	TERM low := (0.01,0) (0.05,1) (0.08,0);
+	TERM medium := (0.05,0) (0.09,1) (0.13,0);
+	TERM high := (0.09,0) (0.13,1) (0.17,0);
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;			// Use 'min' for 'and' (also implicit use 'max' for 'or' to fulfill DeMorgan's Law)
+	ACT : MIN;			// Use 'min' activation method
+	ACCU : MAX;			// Use 'max' accumulation method
+
+	RULE 1 : IF genNoImprovement IS low OR genWithImprovement IS high THEN mutation IS low;
+	RULE 2 : IF genNoImprovement IS medium THEN mutation IS medium; 
+	RULE 3 : IF genNoImprovement IS high AND genWithImprovement IS low THEN mutation IS high;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
+
+
