@@ -16,7 +16,7 @@ public class GA {
         int generationCount = 0;
         //Initial fitness
         //System.out.println("Generation: " + generationCount + " Fittest: " + Math.floor(myPop.getFittest().getFitness()*100)/100 + " Genes: " + myPop.getFittest());
-        for (int k = 0; k < 100; k++){
+        for (int k = 0; k < 1; k++){
             myPop = new Population(50, true);
             for (int i=0;i < 500; i++) {
                 generationCount++;
