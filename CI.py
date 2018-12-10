@@ -69,7 +69,7 @@ class Individual:
         self.width = random.uniform(0.1, self.MAXWIDTH)
         self.length = random.uniform(self.MINLENGTH,self.width)
         self.depth = random.uniform(self.MINDEPTH,2.0)
-        self.thickness = random.uniform(0,self.MAXTHICKNESS)
+        self.thickness = random.uniform(6,self.MAXTHICKNESS)
         self.ind = [self.width, self.length, self.depth, self.thickness]
         #print (self.ind)
 
@@ -108,21 +108,37 @@ class Individual:
     def getWidth(self):
         if self.width > self.MAXWIDTH:
             self.violation = True
+
+        if self.width < 0:
+            self.width = random.uniform(0.1, self.MAXWIDTH)
+
         return self.width
 
     def getLength(self):
         if self.length < self.MINLENGTH:
             self.violation = True
+
+        if self.length < 0:
+            self.length = random.uniform(self.MINLENGTH,self.width)
+
         return self.length
 
     def getThickness(self):
         if self.thickness > self.MAXTHICKNESS:
             self.violation = True
+
+        if self.thickness < 0:
+            self.thickness = random.uniform(6,self.MAXTHICKNESS)
+
         return self.thickness
 
     def getDepth(self):
         if self.depth < self.MINDEPTH:
             self.violation = True
+
+        if self.depth < 0:
+            self.depth = random.uniform(self.MINDEPTH,2.0)
+
         return self.depth
 
     def getFitness(self):
@@ -134,9 +150,10 @@ class Individual:
             # reset the violation flag
             return 0.0
         else:
-            fitness = (1.10471*(math.pow(self.getLength(),2))*self.getDepth()) + (0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth()))
-            geneString = "h: {} w: {} L:{} d:{} Fitness: {}".format(self.width,self.length,self.depth,self.thickness,fitness)
-            print (geneString)
+            fitness = 1/((1.10471*(math.pow(self.getLength(),2))*self.getDepth()) + (0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth())))
+            #geneString = "h: {} w: {} L:{} d:{} Fitness: {}".format(self.width,self.length,self.depth,self.thickness,1/fitness)
+            #print (geneString)
+            #os.system("echo {} >> testing.txt".format(geneString))
             return fitness
 
     def checkConstraint(self):
@@ -156,8 +173,9 @@ class Individual:
         b = (Q*D)/J
         a = 6000/(math.sqrt(2)*w*L)
         tx = math.sqrt(math.pow(a,2)+((a*b*L)/D)+math.pow(b,2))
-        px = 0.61423*(math.pow(10,6))*((d*math.pow(h,3))/6)*(1-(math.pow(30/48,1/d)/28))
-
+        #px = 0.61423*(math.pow(10,6))*((d*math.pow(h,3))/6)*(1-(math.pow(30/48,1/d)/28))
+        # print (h, d)
+        px = 0.61423*(math.pow(10,6))*((d*math.pow(h,3))/6)*(1- (math.pow(math.exp(1), math.log(30/48)/d)))
 
         if (w - h) > 0 :
             self.violation=True
@@ -195,10 +213,11 @@ def simpleArithmeticCrossover(parent1,parent2):
     # return both children
     return child1,child2
 
-def Mutation(parent):
+def Mutation(parent,iteration):
     # Init child1 as parent to undergo mutation
     child = parent
     ProbOfMutation = random.random()
+    
     c = random.uniform(0.8,1.0)
 
     # init mu and sigma
@@ -207,33 +226,42 @@ def Mutation(parent):
 
     s = np.random.normal(mu, sigma, 1000)
     #deltasigma = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (bins - mu)**2 / (2 * sigma**2)
-    num = min(10, max(0, random.gauss(0, 1)))
+    #num = min(10, max(0, random.gauss(0, 2)))
+
     # print (child.getIndividualGeneArray())
     for _ in range(child.getGeneSize()):
-        RandomgeneValue = child.getIndividualGene(_) + num
-        # print ("MR: {} Gene @ {}: to geneVal: {}".format(MutationRate,_,RandomgeneValue))
-        child.setParticularGene(_, RandomgeneValue)
+        if (ProbOfMutation > 0.05):
+            num = random.gauss(0,2)
+            #print ("gaussian: {}".format(num))
+            RandomgeneValue = child.getIndividualGene(_) + num
+            # print ("MR: {} Gene @ {}: to geneVal: {}".format(MutationRate,_,RandomgeneValue))
+            child.setParticularGene(_, RandomgeneValue)
 
     # print (child.getIndividualGeneArray())
     # return mutated child
     return child
 
 def main():
-    popSize = 50
+    popSize = 100
     pop = Population(popSize,1)
-    for y in range(1000):
+    for y in range(1500):
         newPop = Population(popSize,0)
+        newPop.insertPopulation(pop.getFittest())
+        os.system("echo Iteration: {} Fitness: {}>> testing.txt".format(y, 1/(pop.getFittest().getFitness())))
+        print ("Iteration: {} Fitness: {}".format(y, 1/(pop.getFittest().getFitness())))
         for x in range(int(popSize/2)):
             parent1 = pop.getParent()
             parent2 = pop.getParent()
+            fitness1 = parent1.getFitness()
+            fitness2 = parent2.getFitness()
+
             child1,child2 = simpleArithmeticCrossover(parent1,parent2)
-            Mutation(child1)
-            Mutation(child2)
-            #fitness1 = parent1.getFitness()
-            #fitness2 = parent2.getFitness()
+            Mutation(child1,y)
+            Mutation(child2,y)
+
             fitness3 = child1.getFitness()
             fitness4 = child2.getFitness()
-            
+
             newPop.insertPopulation(child1)
             newPop.insertPopulation(child2)
             #os.system("echo \"P1:{} P2:{} C1:{} C2:{}\" >> testing.txt".format(fitness1, fitness2, fitness3, fitness4))
@@ -249,7 +277,7 @@ def validate_checkConstraint():
     d = 7.25774482387524
     w = 0.5794571665426457
     h = 0.6109559551234784
-    #print (W,H,L,D)
+
     #geneString = "w: {} h: {} L:{} d:{}".format(w,h,L,d)
     #os.system("echo {} >> gene.txt".format(geneString))
     ax = (504000/(h*(math.pow(d,2))))
