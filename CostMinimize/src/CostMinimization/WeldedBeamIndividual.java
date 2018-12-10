@@ -27,7 +27,8 @@ public class WeldedBeamIndividual extends Individual {
             setGene(1, Helper.GenerateRandom(0, 10));
             setGene(2, Helper.GenerateRandom(0.1, 2));
             setGene(3, Helper.GenerateRandom(0, 2));
-        }while(constraintsViolated());
+            Helper.generatedIndiv += 1;
+        } while(constraintsViolated());
     }
     
     @Override

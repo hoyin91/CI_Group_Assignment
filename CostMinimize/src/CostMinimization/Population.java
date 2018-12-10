@@ -66,12 +66,27 @@ public class Population {
         return total/size();
     }
     
-    public double getMean(int index){
+    public double getMean(int geneIndex){
         double total = 0;
         for (int i = 0; i < size(); i++){
-            total += individuals[i].getGene(index);
+            total += individuals[i].getGene(geneIndex);
         }
         return total/size();
+    }
+    
+    public double getVariance(int geneIndex){
+        double mean = getMean(geneIndex);
+        double total = 0;
+        
+        for (int i = 0; i < size(); i++){
+            total += Math.pow(individuals[i].getGene(geneIndex) - mean, 2);
+        }
+        
+        return total/size();
+    }
+    
+    public double getStandardDeviation(int geneIndex){
+        return Math.sqrt(getVariance(geneIndex));
     }
 }
 

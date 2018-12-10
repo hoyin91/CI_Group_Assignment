@@ -26,6 +26,7 @@ public class CompressionDesignIndividual extends Individual {
             setGene(0, Helper.GenerateRandom(0.05, 2));
             setGene(1, Helper.GenerateRandom(0.25, 1.3));
             setGene(2, Helper.GenerateRandom(2, 15));
+            
         } while (constraintsViolated());
 
     }

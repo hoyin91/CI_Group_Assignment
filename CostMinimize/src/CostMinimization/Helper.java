@@ -15,6 +15,7 @@ import net.sourceforge.jFuzzyLogic.FIS;
  */
 public class Helper {
     public static Problem problem;
+    public static int generatedIndiv = 0;
     public static double GenerateRandom(double min, double max){
         return (Math.random() * (max - min)) + min;
     }
@@ -60,17 +61,21 @@ public class Helper {
         return Math.sqrt(standardDeviation/length);
     }
     
-    public static double getMutationRate(){
+    public static double getMutationRate(double genWithImprovement, double genNoImprovement){
         System.out.println("Working Directory = " +
               System.getProperty("user.dir"));
         Path path = FileSystems.getDefault().getPath("test.fcl");
         FIS fis = FIS.load("C:\\Users\\yitxi\\Documents\\GitHub\\CI_Group_Assignment\\CostMinimize\\src\\CostMinimization\\test.fcl", true); // Load from 'FCL' file
         //FIS fis = FIS.load(path.toString(), true);
-        fis.setVariable("service", 3); // Set inputs
-        fis.setVariable("food", 7);
+        fis.setVariable("genNoImprovement", genWithImprovement); // Set inputs
+        fis.setVariable("genWithImprovement", genNoImprovement);
         fis.evaluate(); // Evaluate
-        System.out.println("Output value:" + fis.getVariable("tip").getValue()); // Show output variable
+        System.out.println("Output value:" + fis.getVariable("mutation").getValue()); // Show output variable
         
-        return 0;
+        return fis.getVariable("mutation").getValue();
+    }
+    
+    public static void ToLog(String text){
+        
     }
 }
