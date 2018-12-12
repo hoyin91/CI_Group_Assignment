@@ -6,116 +6,12 @@ import skfuzzy as fuzz
 from population import Population
 from individual import Individual
 
-def fuzzy_system(generation_val,convergence_val):
-    x_generation = np.arange(0, 1500, 50)
-    x_convergence = np.arange(0, 1, 0.1)
-    x_recombinationRate  = np.arange(0, 0.5, 0.1)
-
-    # Generate fuzzy membership functions
-    generation_lo = fuzz.trapmf(x_generation, [0, 0, 300,500])
-    generation_md = fuzz.trimf(x_generation, [500, 750, 1000])
-    generation_hi = fuzz.trapmf(x_generation, [1000, 1200, 1500,1500])
-    convergence_lo = fuzz.trapmf(x_convergence, [0, 0, 0.2,0.3])
-    convergence_md = fuzz.trapmf(x_convergence, [0.3, 0.4,0.6, 0.7])
-    convergence_hi = fuzz.trapmf(x_convergence, [0.7, 0.8, 1,1])
-    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.2,0.3])
-    recom_hi = fuzz.trapmf(x_recombinationRate, [0.2, 0.3, 0.5,0.5])
-
-    generation_level_lo = fuzz.interp_membership(x_generation, generation_lo, generation_val)
-    generation_level_md = fuzz.interp_membership(x_generation, generation_md, generation_val)
-    generation_level_hi = fuzz.interp_membership(x_generation, generation_hi, generation_val)
-
-    convergence_level_lo = fuzz.interp_membership(x_convergence, convergence_lo, convergence_val)
-    convergence_level_md = fuzz.interp_membership(x_convergence, convergence_md, convergence_val)
-    convergence_level_hi = fuzz.interp_membership(x_convergence, convergence_hi, convergence_val)
-
-    active_rule1 = np.fmax(generation_level_hi, convergence_level_hi)
-    rate_activation_lo = np.fmin(active_rule1, recom_lo)
-
-    active_rule2 = np.fmax(generation_level_md,convergence_level_md)
-    rate_activation_md = np.fmax(active_rule2,recom_lo)
-
-    active_rule3 = np.fmin(generation_level_lo, convergence_level_lo)
-    rate_activation_hi = np.fmin(active_rule3, recom_hi)
-
-    aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
-    recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
-
-    print("recombination rate = "+str(recom_rate))
-    return recom_rate
-
 
 # Global variable setting
 recombinationVar = 0.7
 popSize = 30
 
-def simpleArithmeticCrossover(parent1,parent2):
-    child1 = Individual()
-    child2 = Individual()
-
-    genePosition=random.randint(0,child1.getGeneSize()-1) # take in size of gene from variable
-    for x in range(child1.getGeneSize()):
-        if x >= genePosition:
-            geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
-            geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
-            #geneValue2 = parent1.getIndividualGene(x)
-            #geneValue1 = parent2.getIndividualGene(x)
-            child1.setParticularGene(x,geneValue1)
-            child2.setParticularGene(x,geneValue2)
-        else:
-            child1.setParticularGene(x,parent1.getIndividualGene(x))
-            child2.setParticularGene(x,parent2.getIndividualGene(x))
-
-    # return both children
-    return child1,child2
-
-def Mutation(parent,iteration):
-    # Init child1 as parent to undergo mutation
-    child = parent
-    ProbOfMutation = random.random()
-    
-    #c = random.uniform(0.8,1.0)
-
-    # init mu and sigma
-    mu,sigma = 0,0.1
-
-    if iteration < 1500*0.2:
-        mu, sigma = 0, 1
-    elif iteration > 1500*0.2:
-        mu, sigma = 0, 0.1
-
-    #s = np.random.normal(mu, sigma, 1000)
-    #guassian_formulat = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (s - mu)**2 / (2 * sigma**2))
-    #print ("gaussian: {}".format(guassian_formulat))
-    #deltasigma = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (bins - mu)**2 / (2 * sigma**2)
-    #num = min(10, max(0, random.gauss(0, 2)))
-    # print (child.getIndividualGeneArray())
-    for _ in range(child.getGeneSize()):
-        if (ProbOfMutation > 0.05):
-            num = random.gauss(mu,sigma)
-            #num = np.random.normal(mu,sigma)
-            RandomgeneValue = child.getIndividualGene(_) + num
-            # print ("MR: {} Gene @ {}: to geneVal: {}".format(MutationRate,_,RandomgeneValue))
-            child.setParticularGene(_, RandomgeneValue)
-
-    # print (child.getIndividualGeneArray())
-    # return mutated child
-    return child
-
-# FPS selection
-# return the parent based on its fitness proportional selection
-def FPS(pop):
-    max = sum(c.getFitness() for c in pop)
-    pick = random.uniform(0, max)
-    current = 0.0
-    for c in pop:
-        current += c.fitness
-        if current > pick:
-            return c
-
-def Tournament(parent1,parent2):
-    return
-
+# Main function at here!
 def main():
     popSize = 100
     pop = Population(popSize,1)
@@ -156,6 +52,137 @@ def main():
         print (pop.getFittest().getFitness())
 
 
+# fuzzy function
+def fuzzy_system(generation_val,convergence_val):
+    x_generation = np.arange(0, 1500, 50)
+    x_convergence = np.arange(0, 1, 0.1)
+    x_recombinationRate  = np.arange(0, 0.5, 0.1)
+
+    # Generate fuzzy membership functions
+    generation_lo = fuzz.trapmf(x_generation, [0, 0, 300,500])
+    generation_md = fuzz.trimf(x_generation, [500, 750, 1000])
+    generation_hi = fuzz.trapmf(x_generation, [1000, 1200, 1500,1500])
+    convergence_lo = fuzz.trapmf(x_convergence, [0, 0, 0.2,0.3])
+    convergence_md = fuzz.trapmf(x_convergence, [0.3, 0.4,0.6, 0.7])
+    convergence_hi = fuzz.trapmf(x_convergence, [0.7, 0.8, 1,1])
+    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.2,0.3])
+    recom_hi = fuzz.trapmf(x_recombinationRate, [0.2, 0.3, 0.5,0.5])
+
+    generation_level_lo = fuzz.interp_membership(x_generation, generation_lo, generation_val)
+    generation_level_md = fuzz.interp_membership(x_generation, generation_md, generation_val)
+    generation_level_hi = fuzz.interp_membership(x_generation, generation_hi, generation_val)
+
+    convergence_level_lo = fuzz.interp_membership(x_convergence, convergence_lo, convergence_val)
+    convergence_level_md = fuzz.interp_membership(x_convergence, convergence_md, convergence_val)
+    convergence_level_hi = fuzz.interp_membership(x_convergence, convergence_hi, convergence_val)
+
+    active_rule1 = np.fmax(generation_level_hi, convergence_level_hi)
+    rate_activation_lo = np.fmin(active_rule1, recom_lo)
+
+    active_rule2 = np.fmax(generation_level_md,convergence_level_md)
+    rate_activation_md = np.fmax(active_rule2,recom_lo)
+
+    active_rule3 = np.fmin(generation_level_lo, convergence_level_lo)
+    rate_activation_hi = np.fmin(active_rule3, recom_hi)
+
+    aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
+    recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
+
+    print("recombination rate = "+str(recom_rate))
+    return recom_rate
+
+#################################
+# GA algorithrm start at here
+#################################
+
+# CROSSOVER ALGORITHM #
+def simpleArithmeticCrossover(parent1,parent2):
+    child1 = Individual()
+    child2 = Individual()
+
+    genePosition=random.randint(0,child1.getGeneSize()-1) # take in size of gene from variable
+    for x in range(child1.getGeneSize()):
+        if x >= genePosition:
+            geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
+            geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
+            #geneValue2 = parent1.getIndividualGene(x)
+            #geneValue1 = parent2.getIndividualGene(x)
+            child1.setParticularGene(x,geneValue1)
+            child2.setParticularGene(x,geneValue2)
+        else:
+            child1.setParticularGene(x,parent1.getIndividualGene(x))
+            child2.setParticularGene(x,parent2.getIndividualGene(x))
+
+    # return both children
+    return child1,child2
+
+
+# MUTATION ALGORITHM
+def Mutation(parent,iteration):
+    # Init child1 as parent to undergo mutation
+    child = parent
+    ProbOfMutation = random.random()
+    
+    #c = random.uniform(0.8,1.0)
+
+    # init mu and sigma
+    mu,sigma = 0,0.1
+
+    if iteration < 1500*0.2:
+        mu, sigma = 0, 1
+    elif iteration > 1500*0.2:
+        mu, sigma = 0, 0.1
+
+    #s = np.random.normal(mu, sigma, 1000)
+    #guassian_formulat = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (s - mu)**2 / (2 * sigma**2))
+    #print ("gaussian: {}".format(guassian_formulat))
+    #deltasigma = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (bins - mu)**2 / (2 * sigma**2)
+    #num = min(10, max(0, random.gauss(0, 2)))
+    # print (child.getIndividualGeneArray())
+    for _ in range(child.getGeneSize()):
+        if (ProbOfMutation > 0.05):
+            num = random.gauss(mu,sigma)
+            #num = np.random.normal(mu,sigma)
+            RandomgeneValue = child.getIndividualGene(_) + num
+            # print ("MR: {} Gene @ {}: to geneVal: {}".format(MutationRate,_,RandomgeneValue))
+            child.setParticularGene(_, RandomgeneValue)
+
+    # print (child.getIndividualGeneArray())
+    # return mutated child
+    return child
+
+
+# PARENT SELECTION ALGORITHM #
+# return the parent based on its fitness proportional selection
+def FPS(pop):
+    max = sum(c.getFitness() for c in pop)
+    pick = random.uniform(0, max)
+    current = 0.0
+    for c in pop:
+        current += c.fitness
+        if current > pick:
+            return c
+
+def Tournament(parent1,parent2):
+    return
+
+
+# take in paramter of iteration and the current fitness level,
+# - if the fitness level increase, control the mu to take the best fitness and slowly reduce it.
+# in earlier stage, set the mu to sigma to be higher.
+# slowly reduce the sigma in later stage.
+def selfAdaptiveGaussianMutationRate():
+    mu, sigma = 0, 0.1 # mean and standard deviation
+    #s = np.random.normal(mu, sigma, 10)
+
+    #print (abs(mu - np.mean(s)) < 0.01)
+    #print (abs(sigma - np.std(s, ddof=1)) < 0.01)
+
+    #num = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (s - mu)**2 / (2 * sigma**2))
+    num = np.random.normal(mu,sigma)
+    return num
+
+# MISCELLANEOUS TOOL #
 def validate_checkConstraint():
     fitness = 0.0
 
@@ -203,27 +230,5 @@ def validate_checkConstraint():
     fitness = (1.10471*(math.pow(w,2))*L) + (0.04811*d*h*(14.0+L))
     return fitness
 
-# take in paramter of iteration and the current fitness level,
-# - if the fitness level increase, control the mu to take the best fitness and slowly reduce it.
-# in earlier stage, set the mu to sigma to be higher.
-# slowly reduce the sigma in later stage.
-def selfAdaptiveGaussianMutationRate():
-    mu, sigma = 0, 0.1 # mean and standard deviation
-    #s = np.random.normal(mu, sigma, 10)
-
-    #print (abs(mu - np.mean(s)) < 0.01)
-    #print (abs(sigma - np.std(s, ddof=1)) < 0.01)
-
-    #num = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (s - mu)**2 / (2 * sigma**2))
-    num = np.random.normal(mu,sigma)
-    return num
-
-#for _ in range(100):
-#    print (selfAdaptiveGaussianMutationRate())
-#    mu, sigma = 0,0.1
-#    print (random.gauss(mu,sigma))
-
 main()
 fuzzy_system(1,0.5)
-#main()
-#print (validate_checkConstraint())
