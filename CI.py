@@ -63,7 +63,7 @@ def fuzzy_system(generation_val,convergence_val):
     generation_md = fuzz.trimf(x_generation, [500, 750, 1000])
     generation_hi = fuzz.trapmf(x_generation, [1000, 1200, 1500,1500])
     convergence_lo = fuzz.trapmf(x_convergence, [0, 0, 0.2,0.3])
-    convergence_md = fuzz.trapmf(x_convergence, [0.3, 0.4,0.6, 0.7])
+    convergence_md = fuzz.trapmf(x_convergence, [0.25, 0.4,0.6, 0.75])
     convergence_hi = fuzz.trapmf(x_convergence, [0.7, 0.8, 1,1])
     recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.15,0.2])
     recom_md = fuzz.trapmf(x_recombinationRate, [0.15, 0.2, 0.3, 0.35])
@@ -79,14 +79,16 @@ def fuzzy_system(generation_val,convergence_val):
 
     active_rule1 = np.fmax(generation_level_hi, convergence_level_hi)
     rate_activation_lo = np.fmin(active_rule1, recom_lo)
+    print (rate_activation_lo)
 
     active_rule2 = np.fmax(generation_level_md,convergence_level_md)
-    rate_activation_md = np.fmax(active_rule2,recom_md)
+    rate_activation_md = np.fmin(active_rule2,recom_md)
+    print (rate_activation_md)
 
     active_rule3 = np.fmin(generation_level_lo,convergence_level_md)
-    active_rule4 = np.fmax(active_rule3, np.fmin(generation_level_lo, convergence_level_lo))
-    rate_activation_hi = np.fmax(active_rule4, recom_hi)
-
+    active_rule4 = np.fmin(active_rule3, np.fmin(generation_level_lo, convergence_level_lo))
+    rate_activation_hi = np.fmin(active_rule4, recom_hi)
+    print (rate_activation_hi)
 
     aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
     recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
@@ -185,6 +187,7 @@ def selfAdaptiveGaussianMutationRate():
     num = np.random.normal(mu,sigma)
     return num
 
+
 # MISCELLANEOUS TOOL #
 def validate_checkConstraint():
     fitness = 0.0
@@ -218,22 +221,20 @@ def validate_checkConstraint():
     elif (w - h) > 0 :
         print ("fail rule 1")
     elif (sx - 0.25) > 0:
-        print ("fail rule 1")
+        print ("fail rule 2")
     elif (tx - 13600) > 0:
-        print ("fail rule 1")
+        print ("fail rule 3")
     elif (ax - 30000) > 0:
-        print ("fail rule 1")
+        print ("fail rule 4")
     elif ((0.10471*math.pow(w,2)) + (0.04811*h*d*(14+L)) - 5) > 0:
-        print ("fail rule 1")
+        print ("fail rule 5")
     elif (0.125 - w) > 0:
-        print ("fail rule 1")
+        print ("fail rule 6")
     elif (6000 - px) > 0:
-        print ("fail rule 1")
+        print ("fail rule 7")
 
     fitness = (1.10471*(math.pow(w,2))*L) + (0.04811*d*h*(14.0+L))
     return fitness
-
-
 
 
 
@@ -241,5 +242,5 @@ def validate_checkConstraint():
 # Run the main function.      #
 # # # # # # # # # # # # # # # #
 if __name__ == "__main__":
-    main()
-    #fuzzy_system(1,0.5)
+    #main()
+    fuzzy_system(1300,0.5)
