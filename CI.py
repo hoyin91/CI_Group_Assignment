@@ -12,10 +12,10 @@ recombinationVar = 0.7
 popSize = 30
 
 # Main function at here!
-def main():
-    popSize = 100
+def main(generation_count,pop_size):
+    popSize = pop_size
     pop = Population(popSize,1)
-    for y in range(1500):
+    for y in range(generation_count):
         newPop = Population(popSize,0)
         newPop.insertPopulation(pop.getFittest())
         #os.system("echo Iteration: {} Fitness: {}>> testing.txt".format(y, 1/(pop.getFittest().getFitness())))
@@ -79,16 +79,13 @@ def fuzzy_system(generation_val,convergence_val):
 
     active_rule1 = np.fmax(generation_level_hi, convergence_level_hi)
     rate_activation_lo = np.fmin(active_rule1, recom_lo)
-    print (rate_activation_lo)
 
     active_rule2 = np.fmax(generation_level_md,convergence_level_md)
     rate_activation_md = np.fmin(active_rule2,recom_md)
-    print (rate_activation_md)
 
     active_rule3 = np.fmin(generation_level_lo,convergence_level_md)
     active_rule4 = np.fmin(active_rule3, np.fmin(generation_level_lo, convergence_level_lo))
     rate_activation_hi = np.fmin(active_rule4, recom_hi)
-    print (rate_activation_hi)
 
     aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
     recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
@@ -242,5 +239,5 @@ def validate_checkConstraint():
 # Run the main function.      #
 # # # # # # # # # # # # # # # #
 if __name__ == "__main__":
-    #main()
-    fuzzy_system(1300,0.5)
+    main(1500,100)
+    #fuzzy_system(250,0.87)
