@@ -22,10 +22,11 @@ class Individual:
         self.fitness = 0.0
 
         self.checkConstraint()
+        # check if newly generated function is within constraint or not
+        # regenerate until it meets the constraint requirement.
         while self.violation:
             self.selfGenerating()
             self.checkConstraint()
-        #print (self.ind)
 
     # get the gene array size
     def getGeneSize(self):
@@ -99,15 +100,16 @@ class Individual:
         self.fitness = 0.0001
         self.checkConstraint()
 
-        # if any parameter violate, return 0.0 directly
-        if self.violation:
+        # if any parameter violate, 
+        # keep regenerate until it meets the conditon then only return the fitness value
+        while self.violation:
             self.selfGenerating()
-            # reset the violation flag
-        else:
-            self.fitness = 1/((1.10471*(math.pow(self.getLength(),2))*self.getDepth()) + (0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth())))
-            #geneString = "h: {} w: {} L:{} d:{} Fitness: {}".format(self.width,self.length,self.depth,self.thickness,1/fitness)
-            #print (geneString)
-            #os.system("echo {} >> testing.txt".format(geneString))
+            self.checkConstraint()
+
+        self.fitness = 1/((1.10471*(math.pow(self.getLength(),2))*self.getDepth()) + (0.04811*self.getThickness()*self.getWidth()*(14.0+self.getDepth())))
+        #geneString = "h: {} w: {} L:{} d:{} Fitness: {}".format(self.width,self.length,self.depth,self.thickness,1/fitness)
+        #print (geneString)
+        #os.system("echo {} >> testing.txt".format(geneString))
         
         return self.fitness
 
