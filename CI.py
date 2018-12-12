@@ -5,6 +5,44 @@ import os
 import skfuzzy as fuzz
 import numpy.random as npr
 
+def fuzzy_system(generation_val,convergence_val):
+    x_generation = np.arange(0, 1500, 50)
+    x_convergence = np.arange(0, 1, 0.1)
+    x_recombinationRate  = np.arange(0, 0.5, 0.1)
+
+    # Generate fuzzy membership functions
+    generation_lo = fuzz.trapmf(x_generation, [0, 0, 300,500])
+    generation_md = fuzz.trimf(x_generation, [500, 750, 1000])
+    generation_hi = fuzz.trapmf(x_generation, [1000, 1200, 1500,1500])
+    convergence_lo = fuzz.trapmf(x_convergence, [0, 0, 0.2,0.3])
+    convergence_md = fuzz.trapmf(x_convergence, [0.3, 0.4,0.6, 0.7])
+    convergence_hi = fuzz.trapmf(x_convergence, [0.7, 0.8, 1,1])
+    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.2,0.3])
+    recom_hi = fuzz.trapmf(x_recombinationRate, [0.2, 0.3, 0.5,0.5])
+
+    generation_level_lo = fuzz.interp_membership(x_generation, generation_lo, generation_val)
+    generation_level_md = fuzz.interp_membership(x_generation, generation_md, generation_val)
+    generation_level_hi = fuzz.interp_membership(x_generation, generation_hi, generation_val)
+
+    convergence_level_lo = fuzz.interp_membership(x_convergence, convergence_lo, convergence_val)
+    convergence_level_md = fuzz.interp_membership(x_convergence, convergence_md, convergence_val)
+    convergence_level_hi = fuzz.interp_membership(x_convergence, convergence_hi, convergence_val)
+
+    active_rule1 = np.fmax(generation_level_hi, convergence_level_hi)
+    rate_activation_lo = np.fmin(active_rule1, recom_lo)
+
+    active_rule2 = np.fmax(generation_level_md,convergence_level_md)
+    rate_activation_md = np.fmax(active_rule2,recom_lo)
+
+    active_rule3 = np.fmin(generation_level_lo, convergence_level_lo)
+    rate_activation_hi = np.fmin(active_rule3, recom_hi)
+
+    aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
+    recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
+
+    print("recombination rate = "+str(recom_rate))
+    return recom_rate
+
 
 # Global variable setting
 recombinationVar = 0.7
@@ -213,10 +251,10 @@ def simpleArithmeticCrossover(parent1,parent2):
     genePosition=random.randint(0,child1.getGeneSize()-1) # take in size of gene from variable
     for x in range(child1.getGeneSize()):
         if x >= genePosition:
-            #geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
-            #geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
-            geneValue2 = parent1.getIndividualGene(x)
-            geneValue1 = parent2.getIndividualGene(x)
+            geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
+            geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
+            #geneValue2 = parent1.getIndividualGene(x)
+            #geneValue1 = parent2.getIndividualGene(x)
             child1.setParticularGene(x,geneValue1)
             child2.setParticularGene(x,geneValue2)
         else:
@@ -376,6 +414,6 @@ def selfAdaptiveGaussianMutationRate():
 #    print (selfAdaptiveGaussianMutationRate())
 #    mu, sigma = 0,0.1
 #    print (random.gauss(mu,sigma))
-
-main()
+fuzzy_system(1,0.5)
+#main()
 #print (validate_checkConstraint())
