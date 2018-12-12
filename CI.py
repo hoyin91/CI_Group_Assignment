@@ -17,8 +17,9 @@ def fuzzy_system(generation_val,convergence_val):
     convergence_lo = fuzz.trapmf(x_convergence, [0, 0, 0.2,0.3])
     convergence_md = fuzz.trapmf(x_convergence, [0.3, 0.4,0.6, 0.7])
     convergence_hi = fuzz.trapmf(x_convergence, [0.7, 0.8, 1,1])
-    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.2,0.3])
-    recom_hi = fuzz.trapmf(x_recombinationRate, [0.2, 0.3, 0.5,0.5])
+    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.15,0.2])
+    recom_md = fuzz.trapmf(x_recombinationRate, [0.15, 0.2, 0.3, 0.35])
+    recom_hi = fuzz.trapmf(x_recombinationRate, [0.3, 0.4, 0.5,0.5])
 
     generation_level_lo = fuzz.interp_membership(x_generation, generation_lo, generation_val)
     generation_level_md = fuzz.interp_membership(x_generation, generation_md, generation_val)
@@ -32,10 +33,12 @@ def fuzzy_system(generation_val,convergence_val):
     rate_activation_lo = np.fmin(active_rule1, recom_lo)
 
     active_rule2 = np.fmax(generation_level_md,convergence_level_md)
-    rate_activation_md = np.fmax(active_rule2,recom_lo)
+    rate_activation_md = np.fmax(active_rule2,recom_md)
 
-    active_rule3 = np.fmin(generation_level_lo, convergence_level_lo)
-    rate_activation_hi = np.fmin(active_rule3, recom_hi)
+    active_rule3 = np.fmin(generation_level_lo,convergence_level_md)
+    active_rule4 = np.fmax(active_rule3, np.fmin(generation_level_lo, convergence_level_lo))
+    rate_activation_hi = np.fmax(active_rule4, recom_hi)
+
 
     aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
     recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
