@@ -230,5 +230,13 @@ def validate_checkConstraint():
     fitness = (1.10471*(math.pow(w,2))*L) + (0.04811*d*h*(14.0+L))
     return fitness
 
-main()
-fuzzy_system(1,0.5)
+
+
+
+
+# # # # # # # # # # # # # # # #
+# Run the main function.      #
+# # # # # # # # # # # # # # # #
+if __name__ == "__main__":
+    main()
+    #fuzzy_system(1,0.5)
