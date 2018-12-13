@@ -202,8 +202,8 @@ def Mutation(parent,iteration):
 
     for _ in range(child.getGeneSize()):
         if (ProbOfMutation > 0.05):
-            num = random.uniform(0,1)
-            RandomgeneValue = child.getIndividualGene(_) * num
+            #num = random.uniform(0,1)
+            RandomgeneValue = child.getIndividualGene(_) + num
             #print ("MR: {} Gene @ {}: to geneVal: {}".format(child.getIndividualGene(_),_,RandomgeneValue))
             child.setParticularGene(_, RandomgeneValue)
 
@@ -222,8 +222,8 @@ def main(generation_count,pop_size):
             parent1 = FPS(pop.getPopulation())
             parent2 = FPS(pop.getPopulation())
             child1,child2 = simpleArithmeticCrossover(parent1,parent2)
-            Mutation(child1,y)
-            Mutation(child2,y)
+            #Mutation(child1,y)
+            #Mutation(child2,y)
 
             #fitness4 = child2.getFitness()
             newPop.insertPopulation(child1)
@@ -247,27 +247,36 @@ def FPS(pop):
 
 main(1000,100)
 
-def checkConstraint(self):
-    self.violation = False
-    w=0.51635
-    L=0.3558679
-    d=11.3389637
+def checkConstraint():
+    fitness = 0.0
+    violation = False
+    w=0.051653711770636
+    d=0.355867916029741
+    L=11.338963731041684
 
-    if not self.violation:
-        g1 = 1 - ((math.pow(d,3) * L) / (71785*math.pow(w,4))) 
-        g2 = 1 - ((140.45 * w) / (math.pow(d,2)*L))
-        g3 = ((w*d)/1.5) - 1
-        #g4 = ((d*((4*d) - w))/(math.pow(w,3)*((12566*d) - w))) + (1/(5108*math.pow(w,2))) - 1
-        g4 = (((4*math.pow(d,2))-(w*d))/((12566*math.pow(w,3)*d)-(12566 * math.pow(w,4)))) + (1/(5108*math.pow(w,2))) - 1
+    g1 = 1 - ((math.pow(d,3) * L) / (71785*math.pow(w,4)))
+    print ((math.pow(d,3) * L))
+    print ((7178*math.pow(w,4)))
+    g2 = 1 - ((140.45 * w) / (math.pow(d,2)*L))
+    g3 = ((w*d)/1.5) - 1
+    #g4 = ((d*((4*d) - w))/(math.pow(w,3)*((12566*d) - w))) + (1/(5108*math.pow(w,2))) - 1
+    g4 = (((4*math.pow(d,2))-(w*d))/((12566*math.pow(w,3)*d)-(12566 * math.pow(w,4)))) + (1/(5108*math.pow(w,2))) - 1
+    print (g1,g2,g3,g4)
 
-        if g1 > 0:
-            self.violation = True
-        elif g2 > 0:
-            self.violation = True
-        elif g3 > 0:
-            self.violation = True
-        elif g4 > 0:
-            self.violation = True
-        else:
-            fitness = 0
+    if g1 > 0:
+        print ("rule 1")
+        violation = True
+    elif g2 > 0:
+        print ("rule 2")
+        violation = True
+    elif g3 > 0:
+        print ("rule 3")
+        violation = True
+    elif g4 > 0:
+        print ("rule 4")
+        violation = True
 
+    fitness = (L + 2 )*(math.pow(w,2))*d
+
+    print (violation, fitness)
+    print (random.uniform(0,1))

@@ -147,7 +147,7 @@ class Individual:
             return 0.001
         else:
             a=(0.6224*self.getThickness()*self.getInnerRadius()*self.getLength())
-            b=(1.7781*self.getThicknessHead()*math.pow(self.getInnerRadius(),2))
+            b=(1.7781*self.getInnerRadius()*math.pow(self.getThicknessHead(),2))
             c=(3.1661*math.pow(self.getThickness(),2)*self.getLength())
             d=(19.84*math.pow(self.getThicknessHead(),2)*self.getInnerRadius())
             fitness = a+b+c+d
@@ -167,7 +167,7 @@ class Individual:
 
         if (-ts + (0.0193*R)) > 0 :
             self.violation=True
-        elif (-th + (0.0095*R)) > 0:
+        elif (-th + (0.00954*R)) > 0:
             self.violation=True
         elif ((-math.pi*math.pow(R,2)*L)-((4*math.pi/3)*math.pow(R,3))+1296000) > 0:
             self.violation=True
@@ -227,8 +227,8 @@ def main():
             parent1 = pop.getParent()
             parent2 = pop.getParent()
             child1,child2 = simpleArithmeticCrossover(parent1,parent2)
-            Mutation(child1)
-            Mutation(child2)
+            #Mutation(child1)
+            #Mutation(child2)
             fitness3 = child1.getFitness()
             fitness4 = child2.getFitness()
             newPop.insertPopulation(child1)
@@ -239,5 +239,40 @@ def main():
             pop = newPop
 
 
-main()
+#main()
 #print (validate_checkConstraint())
+def validate():
+    violation = False
+    ts= 0.812500
+    th= 0.437500
+    L= 176.746500
+    R= 42.091266
+    pi = 3.1441314
+
+    g1 = -ts + (0.0193*R)
+    g2 = -th + (0.00954*R)
+    #g3 = (-math.pi*math.pow(R,2)*L)-((4*math.pi/3)*math.pow(R,3))+1296000
+    g3 = (-math.pi*math.pow(R,2)*L)-((4*math.pi/3)*math.pow(R,3))+1296000
+    g4 = L-240
+
+    print (g1, g2, g3 ,g4)
+    if g1 > 0 :
+        violation=True
+    elif g2 > 0:
+        violation=True
+    elif g3 > 0:
+        violation=True
+    elif g4 > 0:
+        violation = True
+    
+    a=(0.6224*ts*R*L)
+    b=(1.7781*R*math.pow(th,2))
+    c=(3.1661*math.pow(ts,2)*L)
+    d=(19.84*math.pow(ts,2)*R)
+    fitness = a+b+c+d
+
+    print (violation)
+    print (fitness)
+    print ()
+
+validate()
