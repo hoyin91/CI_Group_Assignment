@@ -1,6 +1,7 @@
 package CostMinimization;
 
 import java.util.Random;
+
 public class Algorithm {
 
     /* GA parameters */
@@ -8,13 +9,12 @@ public class Algorithm {
     private static double mutationRate = 0.01;
     private static final int tournamentSize = 5;
     private static final boolean elitism = true;
-    
+
     //fuzzy logic input//
     public static double genNoImprovement = 0;
     public static double genWithImprovement = 0;
 
     /* Public methods */
-    
     // Evolve a population
     public static Population evolvePopulation(Population pop) {
         Population newPopulation = new Population(pop.size(), false);
@@ -40,37 +40,30 @@ public class Algorithm {
             //Individual indiv2 = fpSelection(pop);
             Individual newIndiv = crossover(indiv1, indiv2);
             newIndiv.CheckLimit();
-            
+
             newPopulation.saveIndividual(i, newIndiv);
         }
-      
+        System.out.println(genNoImprovement + ":" + genWithImprovement + ":" + mutationRate);
         mutationRate = Helper.getMutationRate(genWithImprovement, genNoImprovement);
-        //if (genNoImprovement > 3)
-        //    if(mutationRate < 0.1)
-        //        mutationRate += 0.01;
-        
-       //if (genWithImprovement > 10)
-           //mutationRate = mutationRate * 0.5;
-       System.out.println(genNoImprovement + ":" + genWithImprovement + ":" + mutationRate);
-        
+
         // Mutate population
         for (int i = elitismOffset; i < newPopulation.size(); i++) {
-            if (genNoImprovement > 2)
-                mutate(newPopulation.getIndividual(i));
-            else
+            if (genNoImprovement > 100) {
                 mutate2(newPopulation.getIndividual(i), newPopulation);
+            } else {
+                mutate(newPopulation.getIndividual(i));
+            }
             newPopulation.getIndividual(i).CheckLimit();
         }
-        
-        if (newPopulation.getFittest().getFitness() <= pop.getFittest().getFitness())
+
+        if (newPopulation.getFittest().getFitness() <= pop.getFittest().getFitness()) {
             genNoImprovement += 1;
-        else
-        {
+            System.out.println("No Improve");
+        } else {
             genWithImprovement += 1;
             genNoImprovement = 0;
-            mutationRate = 0.01;
         }
-        
+
         return newPopulation;
     }
 
@@ -78,32 +71,34 @@ public class Algorithm {
     private static Individual crossover(Individual indiv1, Individual indiv2) {
         Individual newSol = Helper.GetIndividual();
         double a;
-        if (indiv1.getFitness() > indiv2.getFitness())
+        if (indiv1.getFitness() > indiv2.getFitness()) {
             a = 0.7;
-        else
+        } else {
             a = 0.3;
+        }
         double b = 1 - a;
         // Loop through genes
         for (int i = 0; i < indiv1.size(); i++) {
-            newSol.setGene(i, (a*indiv1.getGene(i))+(b*indiv2.getGene(i)));
+            newSol.setGene(i, (a * indiv1.getGene(i)) + (b * indiv2.getGene(i)));
         }
         return newSol;
     }
+
     //1-point crossover
-    private static Individual crossover2(Individual indiv1, Individual indiv2){
+    private static Individual crossover2(Individual indiv1, Individual indiv2) {
         Individual newSol = Helper.GetIndividual();
-        
-        int point = (int) ((Math.random()*0.7 + 0.2) * (newSol.size() - 1));
+
+        int point = (int) ((Math.random() * 0.7 + 0.2) * (newSol.size() - 1));
         ;
         //Get gene from indiv1
-        for (int i = 0; i < point; i++){
+        for (int i = 0; i < point; i++) {
             newSol.setGene(i, indiv1.getGene(i));
         }
         //Get gene from indiv2
-        for (int i = point; i < newSol.size(); i ++ ){
+        for (int i = point; i < newSol.size(); i++) {
             newSol.setGene(i, indiv2.getGene(i));
         }
-       
+
         return newSol;
     }
 
@@ -118,16 +113,14 @@ public class Algorithm {
             }
         }
     }
-    
+
     // Mutate an individual
     private static void mutate2(Individual indiv, Population pop) {
         // Loop through genes
         for (int i = 0; i < indiv.size(); i++) {
             if (Math.random() <= mutationRate) {
                 Random rand = new Random();
-                //double dist = Helper.GenerateRandom(0, pop.getStandardDeviation(i));
-                //System.out.println(dist);
-                double random = indiv.getGene(i) + (rand.nextGaussian()*pop.getStandardDeviation(i));
+                double random = indiv.getGene(i) + (rand.nextGaussian() * pop.getStandardDeviation(i));
                 indiv.setGene(i, random);
             }
         }
@@ -146,23 +139,23 @@ public class Algorithm {
         Individual fittest = tournament.getFittest();
         return fittest;
     }
-    
+
     //Select individual for crossover using fps
-    private static Individual fpSelection(Population pop){
+    private static Individual fpSelection(Population pop) {
         int fitnessSum = 0;
-        for (int i = 0; i < pop.size(); i++){
+        for (int i = 0; i < pop.size(); i++) {
             Individual individual = pop.getIndividual(i);
             fitnessSum += individual.getFitness();
         }
         double randomValue = Math.random() * fitnessSum;
         int selectedInd = 0;
         int partialSum = 0;
-        for (int i= 0; i < pop.size() ; i++) {
-             partialSum += pop.getIndividual(i).getFitness();
-             if (partialSum > randomValue){
-                 selectedInd = i;
-                 break;
-             }
+        for (int i = 0; i < pop.size(); i++) {
+            partialSum += pop.getIndividual(i).getFitness();
+            if (partialSum > randomValue) {
+                selectedInd = i;
+                break;
+            }
         }
         //System.out.println("Crossover indiv index: " + selectedInd);
         return pop.getIndividual(selectedInd);

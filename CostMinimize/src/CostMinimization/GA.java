@@ -6,7 +6,7 @@ public class GA {
     public static void main(String[] args) {
        // Show each rule (and degree of support)
         //Set Problem
-        Helper.problem = Problem.WELDED_BEAM;
+        Helper.problem = Problem.PRESSURE_VESSEL;
         // Create an initial population
         Population myPop = new Population(50, true);
         double fitnessMean = 0;
@@ -19,7 +19,7 @@ public class GA {
         for (int k = 0; k < 1; k++){
             myPop = new Population(50, true);
             for (int i=0;i < 500; i++) {
-                generationCount = i;
+                generationCount = i+1;
                 //myPop.getFittest().getFitness();
                 myPop = Algorithm.evolvePopulation(myPop);
                 System.out.println("Generation: " + generationCount + " Fittest: " + 1/myPop.getFittest().getFitness() + " Mean: " + 1/myPop.getFitnessMean() +  " Genes: " + myPop.getFittest());
