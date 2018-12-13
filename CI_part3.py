@@ -151,8 +151,8 @@ class Individual:
             c=(3.1661*math.pow(self.getThickness(),2)*self.getLength())
             d=(19.84*math.pow(self.getThicknessHead(),2)*self.getInnerRadius())
             fitness = a+b+c+d
-            geneString = "h: {} w: {} L:{} d:{} Fitness: {}".format(self.thickness,self.thicknessHead,self.innerRadius,self.length,fitness)
-            print (geneString)
+            #geneString = "h: {} w: {} L:{} d:{} Fitness: {}".format(self.thickness,self.thicknessHead,self.innerRadius,self.length,fitness)
+            #print (geneString)
             return fitness
 
     def checkConstraint(self):
@@ -238,53 +238,6 @@ def main():
             # replace the entire population with newly generated children
             pop = newPop
 
-
-def validate_checkConstraint():
-    fitness = 0.0
-
-    L = 1.4313509130700104
-    d = 7.25774482387524
-    w = 0.5794571665426457
-    h = 0.6109559551234784
-    #print (W,H,L,D)
-    #geneString = "w: {} h: {} L:{} d:{}".format(w,h,L,d)
-    #os.system("echo {} >> gene.txt".format(geneString))
-    ax = (504000/(h*(math.pow(d,2))))
-    Q = 6000*(14+(L/2))
-    D = (1/2)*(math.sqrt(math.pow(L,2)+math.pow(w+d,2)))
-    J = math.sqrt(2)*w*L*((math.pow(L,2)/6)+(math.pow(w+d,2)/2))
-    sx = 65856/((30000)*h*math.pow(D,3))
-    b = (Q*D)/J
-    a = 6000/(math.sqrt(2)*w*L)
-    tx = math.sqrt(math.pow(a,2)+((a*b*L)/D)+math.pow(b,2))
-    px = 0.61423*(math.pow(10,6))*((d*math.pow(h,3))/6)*(1-(math.pow(30/48,1/d)/28))
-
-
-    if w < 0.1:
-        print ("fail w")
-    elif h > 2.0:
-        print ("fail h")
-    elif d > 10:
-        print ("fail d")
-    elif L < 0.1:
-        print ("fail L")
-    elif (w - h) > 0 :
-        print ("fail rule 1")
-    elif (sx - 0.25) > 0:
-        print ("fail rule 1")
-    elif (tx - 13600) > 0:
-        print ("fail rule 1")
-    elif (ax - 30000) > 0:
-        print ("fail rule 1")
-    elif ((0.10471*math.pow(w,2)) + (0.04811*h*d*(14+L)) - 5) > 0:
-        print ("fail rule 1")
-    elif (0.125 - w) > 0:
-        print ("fail rule 1")
-    elif (6000 - px) > 0:
-        print ("fail rule 1")
-
-    fitness = (1.10471*(math.pow(w,2))*L) + (0.04811*d*h*(14.0+L))
-    return fitness
 
 main()
 #print (validate_checkConstraint())

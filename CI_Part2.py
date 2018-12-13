@@ -38,7 +38,7 @@ class Population:
         # Loop through individuals to find fittest
         fittest = self.getIndividual(0)
         for _ in range(self.popSize):
-            if (fittest.getFitness() <= self.getIndividual(_).getFitness()):
+            if (fittest.getFitness() >= self.getIndividual(_).getFitness()):
                 fittest = self.getIndividual(_)
         
         return fittest;
@@ -58,8 +58,8 @@ class Individual:
     # Init gene with random value, each individual has 4 genes
     def __init__(self):
         # init constraint of each parameter
-        self.MAXWIDTH = 2.0
         self.MINWIDTH = 0.05
+        self.MAXWIDTH = 2.0
 
         self.MINLENGTH = 2.0
         self.MAXLENGTH = 15.0
@@ -75,6 +75,18 @@ class Individual:
         self.length = random.uniform(self.MINLENGTH,self.MAXLENGTH)
         self.depth = random.uniform(self.MINDEPTH,self.MAXLENGTH)
         self.ind = [self.width, self.length, self.depth]
+
+        self.checkConstraint()
+        while self.violation:
+            self.selfGenerating()
+            self.checkConstraint()
+
+    def selfGenerating(self):
+        self.width = random.uniform(self.MINWIDTH, self.MAXWIDTH)
+        self.length = random.uniform(self.MINLENGTH, self.MAXLENGTH)
+        self.depth = random.uniform(self.MINDEPTH, self.MAXLENGTH)
+        self.ind = [self.width, self.length, self.depth]
+        return
 
     # get the gene array size
     def getGeneSize(self):
@@ -106,64 +118,52 @@ class Individual:
         self.ind = [self.width, self.length, self.depth]
 
     def getWidth(self):
-        if self.width > self.MAXWIDTH or self.width < self.MINWIDTH:
+        if (self.width > self.MAXWIDTH) or (self.width < self.MINWIDTH):
             self.violation = True
-            self.width = random.uniform(self.MINWIDTH, self.MAXWIDTH)
         return self.width
 
     def getLength(self):
-        if self.length < self.MINLENGTH or self.length > self.MAXLENGTH:
+        if (self.length < self.MINLENGTH) or (self.length > self.MAXLENGTH):
             self.violation = True
-            self.width = random.uniform(self.MINLEGNTH, self.MAXWIDTH)
         return self.length
 
     def getDepth(self):
-        if self.depth < self.MINDEPTH or self.depth > self.MAXDEPTH:
+        if (self.depth < self.MINDEPTH) or (self.depth > self.MAXDEPTH):
             self.violation = True
-            self.depth = random.uniform(self.MINDEPTH, self.MAXDEPTH)
         return self.depth
 
     def getFitness(self):
-        fitness = 0.0
-        self.checkConstraint()
+        fitness = 0.00001
 
         # if any parameter violate, return 0.0 directly
         if self.violation:
-            # reset the violation flag
-            return 0.001
+           # reset the violation flag
+            return self.fitness
         else:
-            fitness = (self.getLength()/2) * math.pow(self.getWidth(),2) * self.getDepth() 
-            return fitness
+            self.fitness = (self.getLength() + 2) * math.pow(self.getWidth(),2) * self.getDepth()
+            return self.fitness
 
     def checkConstraint(self):
         self.violation = False
         w=self.getWidth()
         L=self.getLength()
         d=self.getDepth()
-        print (w,L,d)
-        g1 = 1 - ((math.pow(d,3) * L) / (71785*math.pow(w,4)))
-        print (g1)
-        g2 = 1 - ((149.45 * w) / (math.pow(d,2)*L))
-        g3 = ((2*(w*d))/3) - 1
-        g4 = (d*((4*d) - w))/(math.pow(w,4)*((12566*d) - w)) + (1/(5108*math.pow(w,2))) - 1
 
-        if g1 > 0:
-            print ("fail rule1")
-            self.violation = True
-        elif g2 > 0:
-            print ("fail rule2")
-            self.violation = True
-        elif g3 > 0:
-            print ("fail rule3")
-            self.violation = True
-        elif g4 > 0:
-            print ("fail rule4")
-            self.violation = True
+        if not self.violation:
+            g1 = 1 - ((math.pow(d,3) * L) / (71785*math.pow(w,4))) 
+            g2 = 1 - ((140.45 * w) / (math.pow(d,2)*L))
+            g3 = ((w*d)/1.5) - 1
+            #g4 = ((d*((4*d) - w))/(math.pow(w,3)*((12566*d) - w))) + (1/(5108*math.pow(w,2))) - 1
+            g4 = (((4*math.pow(d,2))-(w*d))/((12566*math.pow(w,3)*d)-(12566 * math.pow(w,4)))) + (1/(5108*math.pow(w,2))) - 1
 
-        if self.violation:
-            pass
-        else:
-            print ("FIT")
+            if g1 > 0:
+                self.violation = True
+            elif g2 > 0:
+                self.violation = True
+            elif g3 > 0:
+                self.violation = True
+            elif g4 > 0:
+                self.violation = True
 
 
 def simpleArithmeticCrossover(parent1,parent2):
@@ -196,15 +196,15 @@ def Mutation(parent,iteration):
     mu,sigma = 0,0.1
 
     if iteration < 1500*0.2:
-        mu, sigma = 0, 1
+        mu, sigma = 0, 0.5
     elif iteration > 1500*0.2:
         mu, sigma = 0, 0.1
 
     for _ in range(child.getGeneSize()):
         if (ProbOfMutation > 0.05):
-            num = random.gauss(mu,sigma)
-            RandomgeneValue = child.getIndividualGene(_) + num
-            # print ("MR: {} Gene @ {}: to geneVal: {}".format(MutationRate,_,RandomgeneValue))
+            num = random.uniform(0,1)
+            RandomgeneValue = child.getIndividualGene(_) * num
+            #print ("MR: {} Gene @ {}: to geneVal: {}".format(child.getIndividualGene(_),_,RandomgeneValue))
             child.setParticularGene(_, RandomgeneValue)
 
     return child
@@ -216,7 +216,8 @@ def main(generation_count,pop_size):
     for y in range(generation_count):
         newPop = Population(popSize,0)
         newPop.insertPopulation(pop.getFittest())
-        print ("Iteration: {} Fitness: {}".format(y, 1/(pop.getFittest().getFitness())))
+        print (pop.getFittest().getIndividualGeneArray())
+        print ("Iteration: {} Fitness: {}".format(y, (pop.getFittest().getFitness())))
         for x in range(int(popSize/2)):
             parent1 = FPS(pop.getPopulation())
             parent2 = FPS(pop.getPopulation())
@@ -224,17 +225,13 @@ def main(generation_count,pop_size):
             Mutation(child1,y)
             Mutation(child2,y)
 
-            fitness3 = child1.getFitness()
-            fitness4 = child2.getFitness()
-
+            #fitness4 = child2.getFitness()
             newPop.insertPopulation(child1)
             newPop.insertPopulation(child2)
             #os.system("echo \"P1:{} P2:{} C1:{} C2:{}\" >> testing.txt".format(fitness1, fitness2, fitness3, fitness4))
         else:
             # replace the entire population with newly generated children
             pop = newPop
-    else:
-        print (pop.getFittest().getFitness())
 
 
 # PARENT SELECTION ALGORITHM #
@@ -248,4 +245,29 @@ def FPS(pop):
         if current > pick:
             return c
 
-main(1000,200)
+main(1000,100)
+
+def checkConstraint(self):
+    self.violation = False
+    w=0.51635
+    L=0.3558679
+    d=11.3389637
+
+    if not self.violation:
+        g1 = 1 - ((math.pow(d,3) * L) / (71785*math.pow(w,4))) 
+        g2 = 1 - ((140.45 * w) / (math.pow(d,2)*L))
+        g3 = ((w*d)/1.5) - 1
+        #g4 = ((d*((4*d) - w))/(math.pow(w,3)*((12566*d) - w))) + (1/(5108*math.pow(w,2))) - 1
+        g4 = (((4*math.pow(d,2))-(w*d))/((12566*math.pow(w,3)*d)-(12566 * math.pow(w,4)))) + (1/(5108*math.pow(w,2))) - 1
+
+        if g1 > 0:
+            self.violation = True
+        elif g2 > 0:
+            self.violation = True
+        elif g3 > 0:
+            self.violation = True
+        elif g4 > 0:
+            self.violation = True
+        else:
+            fitness = 0
+
