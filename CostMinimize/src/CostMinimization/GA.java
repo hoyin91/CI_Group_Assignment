@@ -19,7 +19,7 @@ public class GA {
         for (int k = 0; k < 1; k++){
             myPop = new Population(50, true);
             for (int i=0;i < 500; i++) {
-                generationCount++;
+                generationCount = i;
                 //myPop.getFittest().getFitness();
                 myPop = Algorithm.evolvePopulation(myPop);
                 System.out.println("Generation: " + generationCount + " Fittest: " + 1/myPop.getFittest().getFitness() + " Mean: " + 1/myPop.getFitnessMean() +  " Genes: " + myPop.getFittest());

@@ -6,7 +6,7 @@ public class Algorithm {
     /* GA parameters */
     private static final double uniformRate = 0.5;
     private static double mutationRate = 0.01;
-    private static final int tournamentSize = 10;
+    private static final int tournamentSize = 5;
     private static final boolean elitism = true;
     
     //fuzzy logic input//
@@ -51,11 +51,11 @@ public class Algorithm {
         
        //if (genWithImprovement > 10)
            //mutationRate = mutationRate * 0.5;
-       System.out.println(genNoImprovement + ":" + genWithImprovement);
+       System.out.println(genNoImprovement + ":" + genWithImprovement + ":" + mutationRate);
         
         // Mutate population
         for (int i = elitismOffset; i < newPopulation.size(); i++) {
-            if (genNoImprovement > 10)
+            if (genNoImprovement > 2)
                 mutate(newPopulation.getIndividual(i));
             else
                 mutate2(newPopulation.getIndividual(i), newPopulation);
@@ -127,7 +127,7 @@ public class Algorithm {
                 Random rand = new Random();
                 //double dist = Helper.GenerateRandom(0, pop.getStandardDeviation(i));
                 //System.out.println(dist);
-                double random = pop.getMean(i) + rand.nextGaussian();
+                double random = indiv.getGene(i) + (rand.nextGaussian()*pop.getStandardDeviation(i));
                 indiv.setGene(i, random);
             }
         }
