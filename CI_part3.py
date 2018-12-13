@@ -2,6 +2,8 @@ import random
 import numpy as np
 import math
 import os
+from individual import Individual
+
 
 recombinationVar = 0.7
 popSize = 30
@@ -67,12 +69,21 @@ class Individual:
 
         #assign to random.random() for random float (0.0 - 1.0)
 
-        self.thickness = random.uniform(self.MINTHICKNESS, 6)
+        self.thickness = random.uniform(self.MINTHICKNESS, 10)
         self.thicknessHead = random.uniform(0.1, self.MAXTHICKNESSHEAD)
-        self.innerRadius = random.uniform(self.MININNERRADIUS,100)
-        self.length = random.uniform(0.1,self.MAXLENGTH)
+        self.innerRadius = random.uniform(self.MININNERRADIUS,20)
+        self.length = random.uniform(10,self.MAXLENGTH)
         self.ind = [self.thicknessHead, self.thickness, self.innerRadius, self.length]
-        #print (self.ind)
+
+        self.checkConstraint()
+
+        #print ("start to stuck")
+        #while self.violation:
+        #    self.checkConstraint()
+        #    self.getFitness()
+        #    print ("regenerating")
+
+        #print ("generated")
 
     # get the gene array size
     def getGeneSize(self):
@@ -122,7 +133,7 @@ class Individual:
         return self.innerRadius
 
     def getLength(self):
-        if self.length < self.MAXLENGTH:
+        if self.length > self.MAXLENGTH:
             self.violation = True
         return self.length
 
@@ -133,7 +144,7 @@ class Individual:
         # if any parameter violate, return 0.0 directly
         if self.violation:
             # reset the violation flag
-            return 0.0
+            return 0.001
         else:
             a=(0.6224*self.getThickness()*self.getInnerRadius()*self.getLength())
             b=(1.7781*self.getThicknessHead()*math.pow(self.getInnerRadius(),2))
@@ -150,9 +161,9 @@ class Individual:
         th=self.getThicknessHead()
         L=self.getLength()
         R=self.getInnerRadius()
-        #print (W,H,L,D)
-        #geneString = "w: {} h: {} L:{} d:{}".format(w,h,L,d)
-        #os.system("echo {} >> gene.txt".format(geneString))
+        #print (ts,th,L,R)
+        geneString = "w: {} h: {} L:{} d:{}".format(ts,th,L,R)
+        #os.system("echo {} >> genes_py3.txt".format(geneString))
 
         if (-ts + (0.0193*R)) > 0 :
             self.violation=True
@@ -162,8 +173,6 @@ class Individual:
             self.violation=True
         elif (L - 240) > 0:
             self.violation = True
-        
-
 
 def simpleArithmeticCrossover(parent1,parent2):
     child1 = Individual()
@@ -213,17 +222,15 @@ def main():
     pop = Population(popSize,1)
     for y in range(1000):
         newPop = Population(popSize,0)
+        print ("Iteration: {} Fitness: {}".format(y, 1/(pop.getFittest().getFitness())))
         for x in range(int(popSize/2)):
             parent1 = pop.getParent()
             parent2 = pop.getParent()
             child1,child2 = simpleArithmeticCrossover(parent1,parent2)
             Mutation(child1)
             Mutation(child2)
-            #fitness1 = parent1.getFitness()
-            #fitness2 = parent2.getFitness()
             fitness3 = child1.getFitness()
             fitness4 = child2.getFitness()
-            
             newPop.insertPopulation(child1)
             newPop.insertPopulation(child2)
             #os.system("echo \"P1:{} P2:{} C1:{} C2:{}\" >> testing.txt".format(fitness1, fitness2, fitness3, fitness4))
