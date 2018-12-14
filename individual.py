@@ -102,11 +102,11 @@ class Individual:
 
         # if any parameter violate, 
         # keep regenerate until it meets the conditon then only return the fitness value
-        while self.violation:
-            self.selfGenerating()
-            self.checkConstraint()
-
-        self.fitness = 1/((1.10471*(math.pow(self.getLength(),2))*self.getDepth()) + (0.04811*self.getThickness()*self.getWidth()*(14.0-self.getDepth())))
+        #while self.violation:
+        #    self.selfGenerating()
+        #    self.checkConstraint()
+        if not self.violation:
+            self.fitness = 1/((1.10471*(math.pow(self.getLength(),2))*self.getDepth()) + (0.04811*self.getThickness()*self.getWidth()*(14.0-self.getDepth())))
         #geneString = "h: {} w: {} L:{} d:{} Fitness: {}".format(self.width,self.length,self.depth,self.thickness,1/fitness)
         #print (geneString)
         #os.system("echo {} >> testing.txt".format(geneString))
@@ -156,3 +156,17 @@ class Individual:
         self.thickness = random.uniform(6,self.MAXTHICKNESS)
         self.ind = [self.width, self.length, self.depth, self.thickness]
         return
+
+    def selfGeneratingGene(self,index):
+        if index == 1:
+            self.width = random.uniform(0.1, self.MAXWIDTH)
+            return self.width
+        elif index == 2:
+            self.length = random.uniform(self.MINLENGTH,self.width)
+            return self.length
+        elif index == 3:
+            self.depth = random.uniform(self.MINDEPTH,2.0)
+            return self.depth
+        elif index == 4:
+            self.thickness = random.uniform(6,self.MAXTHICKNESS)
+            return self.thickness

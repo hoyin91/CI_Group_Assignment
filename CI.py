@@ -9,7 +9,6 @@ from individual import Individual
 
 # Global variable setting
 recombinationVar = 0.7
-popSize = 30
 
 # Main function at here!
 def main(generation_count,pop_size):
@@ -18,39 +17,25 @@ def main(generation_count,pop_size):
     for y in range(generation_count):
         newPop = Population(popSize,0)
         newPop.insertPopulation(pop.getFittest())
-        #os.system("echo Iteration: {} Fitness: {}>> testing.txt".format(y, 1/(pop.getFittest().getFitness())))
+        print (pop.getFittest().getIndividualGeneArray())
         print ("Iteration: {} Fitness: {}".format(y, 1/(pop.getFittest().getFitness())))
         for x in range(int(popSize/2)):
-            #parent1 = pop.getParent()
-            #parent2 = pop.getParent()
             parent1 = FPS(pop.getPopulation())
             parent2 = FPS(pop.getPopulation())
-            #if (parent1.getIndividualGeneArray() == parent2.getIndividualGeneArray()):
-                #geneString = "w: {} h: {} L:{} d:{}".format(w,h,L,d)
-                #os.system("echo {} {} >> gene.txt".format(parent1.getIndividualGeneArray(),parent2.getIndividualGeneArray()))
-            #print (parent1.getIndividualGeneArray())
-            #print (parent2.getIndividualGeneArray())
-            # check the fitness of the parent, if the fitness is not good, then don't select them.
-            # set fitness proportional selection for the parent.
-            #fitness1 = parent1.getFitness()
-            #fitness2 = parent2.getFitness()
 
             child1,child2 = simpleArithmeticCrossover(parent1,parent2)
-            Mutation(child1,y)
-            Mutation(child2,y)
 
-            fitness3 = child1.getFitness()
-            fitness4 = child2.getFitness()
+            Mutation(child1,y,pop)
+            Mutation(child2,y,pop)
 
             newPop.insertPopulation(child1)
             newPop.insertPopulation(child2)
-            #os.system("echo \"P1:{} P2:{} C1:{} C2:{}\" >> testing.txt".format(fitness1, fitness2, fitness3, fitness4))
         else:
             # replace the entire population with newly generated children
             pop = newPop
     else:
-        print (pop.getFittest().getFitness())
-
+        # print out the fitness' gene array
+        print (pop.getFittest().getIndividualGeneArray())
 
 # fuzzy function
 def fuzzy_system(generation_val,convergence_val):
@@ -120,7 +105,7 @@ def simpleArithmeticCrossover(parent1,parent2):
 
 
 # MUTATION ALGORITHM
-def Mutation(parent,iteration):
+def Mutation(parent,iteration, population):
     # Init child1 as parent to undergo mutation
     child = parent
     ProbOfMutation = random.random()
@@ -135,21 +120,17 @@ def Mutation(parent,iteration):
     elif iteration > 1500*0.2:
         mu, sigma = 0, 0.1
 
-    #s = np.random.normal(mu, sigma, 1000)
-    #guassian_formulat = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (s - mu)**2 / (2 * sigma**2))
-    #print ("gaussian: {}".format(guassian_formulat))
-    #deltasigma = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (bins - mu)**2 / (2 * sigma**2)
-    #num = min(10, max(0, random.gauss(0, 2)))
-    # print (child.getIndividualGeneArray())
     for _ in range(child.getGeneSize()):
         if (ProbOfMutation > 0.05):
-            num = random.gauss(mu,sigma)
-            #num = np.random.normal(mu,sigma)
-            RandomgeneValue = child.getIndividualGene(_) + num
+            print (population.getStandardDeviation(_))
+            RandomgeneValue = child.getIndividualGene(_) + (random.uniform(0,2) * population.getStandardDeviation(_))
+            if (RandomgeneValue < 0):
+                RandomgeneValue = 0.0001
+                #RandomgeneValue = float(child.selfGeneratingGene(_))
             # print ("MR: {} Gene @ {}: to geneVal: {}".format(MutationRate,_,RandomgeneValue))
             child.setParticularGene(_, RandomgeneValue)
 
-    # print (child.getIndividualGeneArray())
+    #print (child.getIndividualGeneArray())
     # return mutated child
     return child
 
@@ -189,10 +170,10 @@ def selfAdaptiveGaussianMutationRate():
 def validate_checkConstraint():
     fitness = 0.0
 
-    L = 1.4313509130700104
-    d = 7.25774482387524
-    w = 0.5794571665426457
-    h = 0.6109559551234784
+    h = 0.8095680981774316
+    w = 0.16138492664005277
+    L = 12.49983827668806
+    d = 4.66163559389344
 
     #geneString = "w: {} h: {} L:{} d:{}".format(w,h,L,d)
     #os.system("echo {} >> gene.txt".format(geneString))
@@ -231,6 +212,7 @@ def validate_checkConstraint():
         print ("fail rule 7")
 
     fitness = (1.10471*(math.pow(w,2))*L) + (0.04811*d*h*(14.0+L))
+    print (fitness)
     return fitness
 
 
@@ -239,5 +221,6 @@ def validate_checkConstraint():
 # Run the main function.      #
 # # # # # # # # # # # # # # # #
 if __name__ == "__main__":
-    main(1500,100)
+    main(200,100)
+    #validate_checkConstraint()
     #fuzzy_system(250,0.87)
