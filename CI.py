@@ -122,7 +122,7 @@ def Mutation(parent,iteration, population):
 
     for _ in range(child.getGeneSize()):
         if (ProbOfMutation > 0.05):
-            print (population.getStandardDeviation(_))
+            #print (population.getStandardDeviation(_))
             RandomgeneValue = child.getIndividualGene(_) + (random.uniform(0,2) * population.getStandardDeviation(_))
             if (RandomgeneValue < 0):
                 RandomgeneValue = 0.0001
@@ -170,10 +170,10 @@ def selfAdaptiveGaussianMutationRate():
 def validate_checkConstraint():
     fitness = 0.0
 
-    h = 0.8095680981774316
-    w = 0.16138492664005277
-    L = 12.49983827668806
-    d = 4.66163559389344
+    h = 0.548373283021592
+    w = 0.15916933117704524
+    L = 9.489813919552256
+    d = 6.496249780018151
 
     #geneString = "w: {} h: {} L:{} d:{}".format(w,h,L,d)
     #os.system("echo {} >> gene.txt".format(geneString))
@@ -221,6 +221,6 @@ def validate_checkConstraint():
 # Run the main function.      #
 # # # # # # # # # # # # # # # #
 if __name__ == "__main__":
-    main(200,100)
+    main(1500,50)
     #validate_checkConstraint()
     #fuzzy_system(250,0.87)

@@ -97,7 +97,7 @@ class Individual:
         return self.depth
 
     def getFitness(self):
-        self.fitness = 0.0001
+        self.fitness = 9999
         self.checkConstraint()
 
         # if any parameter violate, 
@@ -110,7 +110,6 @@ class Individual:
         #geneString = "h: {} w: {} L:{} d:{} Fitness: {}".format(self.width,self.length,self.depth,self.thickness,1/fitness)
         #print (geneString)
         #os.system("echo {} >> testing.txt".format(geneString))
-        
         return self.fitness
 
     def checkConstraint(self):

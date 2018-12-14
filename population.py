@@ -40,10 +40,10 @@ class Population:
 
     def getFittest(self):
         # Loop through individuals to find fittest
-        fittest = Individual()
+        fittest = self.getIndividual(0)
         for _ in range(self.popSize):
             if not self.getIndividual(_).violation:
-                if (fittest.getFitness() <= self.getIndividual(_).getFitness()):
+                if (fittest.getFitness() > self.getIndividual(_).getFitness()):
                     fittest = self.getIndividual(_)
         
         return fittest;
@@ -61,14 +61,14 @@ class Population:
         mean = 0.0
         for _ in range(self.popSize):
             mean += self.getIndividual(_).getIndividualGene(geneIndex)
-        return mean
+        return mean/self.popSize
 
     def getVariance(self,geneIndex):
         mean = self.getMean(geneIndex)
         total = 0.0
 
         for _ in range(self.popSize):
-            total += (math.pow((self.getIndividual(_).getIndividualGene(geneIndex) - mean),2))
+            total += (math.pow(((self.getIndividual(_).getIndividualGene(geneIndex) - mean))/self.popSize,2))
 
         return total/self.popSize
 
