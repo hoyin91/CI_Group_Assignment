@@ -12,10 +12,20 @@ class Population:
     def __init__(self,popSize,init):
         self.popSize = popSize
         self.pop = []
+        self.mean = [0.0, 0.0, 0.0]
+        self.stdev = [0.0, 0.0, 0.0]
+        self.variance = [0.0, 0.0, 0.0]
+
         if init:
             for _ in range(popSize):
                 self.ind = Individual()
                 self.insertPopulation(self.ind)
+
+    # destructor to clean up those value when we reassign those param
+    def __del__(self):
+        self.mean = [0.0, 0.0, 0.0]
+        self.stdev = [0.0, 0.0, 0.0]
+        self.variance = [0.0, 0.0, 0.0]
 
     # generate population (array)
     def insertPopulation(self,ind):
@@ -38,7 +48,7 @@ class Population:
         # Loop through individuals to find fittest
         fittest = self.getIndividual(0)
         for _ in range(self.popSize):
-            if (fittest.getFitness() >= self.getIndividual(_).getFitness()):
+            if (fittest.getFitness() > self.getIndividual(_).getFitness()):
                 fittest = self.getIndividual(_)
         
         return fittest;
@@ -52,6 +62,47 @@ class Population:
         index = random.randint(0,(self.popSize-1))
         return self.getIndividual(index)
 
+
+    def getPopulationMean(self,geneIndex):
+
+        if not self.mean[geneIndex]:
+            for _ in range(self.popSize):
+                self.mean[geneIndex] += self.getIndividual(_).getIndividualGene(geneIndex)
+            else:
+                self.mean[geneIndex] = self.mean[geneIndex]/(self.popSize)
+
+        return self.mean[geneIndex]
+
+    def getPopulationVariance(self,geneIndex):
+        mean = self.getPopulationMean(geneIndex)
+        total = 0.0
+
+        if not self.variance[geneIndex]:
+            for _ in range(self.popSize):
+                total += math.pow((self.getIndividual(_).getIndividualGene(geneIndex) - mean),2)
+            else:
+                self.variance[geneIndex] = total/(self.popSize-1)
+
+        return self.variance[geneIndex]
+
+    def getPopulationStdDev(self,geneIndex):
+        array = []
+        if not self.stdev[geneIndex]:
+            for _ in range(self.popSize):
+                self.stdev[geneIndex] = math.sqrt(self.getPopulationVariance(geneIndex))
+
+        return self.stdev[geneIndex]
+
+    def getPopulationParameterStdDev(self):
+        try:
+            ind = Individual()
+            for _ in range(ind.getGeneSize()):
+                self.getPopulationStdDev(_)
+
+            #print (self.stdev)
+            return self.stdev
+        except:
+            return 0.0001
 
 class Individual:
 
@@ -133,15 +184,15 @@ class Individual:
         return self.depth
 
     def getFitness(self):
-        fitness = 0.00001
+        fitness = 9999
+        self.checkConstraint()
 
-        # if any parameter violate, return 0.0 directly
-        if self.violation:
-           # reset the violation flag
-            return self.fitness
-        else:
+        # if any parameter violate, return 9999 directly
+        if not self.violation:
             self.fitness = (self.getLength() + 2) * math.pow(self.getWidth(),2) * self.getDepth()
-            return self.fitness
+
+        
+        return self.fitness
 
     def checkConstraint(self):
         self.violation = False
@@ -149,26 +200,25 @@ class Individual:
         L=self.getLength()
         d=self.getDepth()
 
-        if not self.violation:
-            g1 = 1 - ((math.pow(d,3) * L) / (71785*math.pow(w,4))) 
-            g2 = 1 - ((140.45 * w) / (math.pow(d,2)*L))
-            g3 = ((w*d)/1.5) - 1
-            #g4 = ((d*((4*d) - w))/(math.pow(w,3)*((12566*d) - w))) + (1/(5108*math.pow(w,2))) - 1
-            g4 = (((4*math.pow(d,2))-(w*d))/((12566*math.pow(w,3)*d)-(12566 * math.pow(w,4)))) + (1/(5108*math.pow(w,2))) - 1
+        g1 = 1 - ((math.pow(d,3) * L) / (71785*math.pow(w,4))) 
+        g2 = 1 - ((140.45 * w) / (math.pow(d,2)*L))
+        g3 = ((w*d)/1.5) - 1
+        #g4 = ((d*((4*d) - w))/(math.pow(w,3)*((12566*d) - w))) + (1/(5108*math.pow(w,2))) - 1
+        g4 = (((4*math.pow(d,2))-(w*d))/((12566*math.pow(w,3)*d)-(12566 * math.pow(w,4)))) + (1/(5108*math.pow(w,2))) - 1
 
-            if g1 > 0:
-                self.violation = True
-            elif g2 > 0:
-                self.violation = True
-            elif g3 > 0:
-                self.violation = True
-            elif g4 > 0:
-                self.violation = True
+        if g1 > 0:
+            self.violation = True
+        elif g2 > 0:
+            self.violation = True
+        elif g3 > 0:
+            self.violation = True
+        elif g4 > 0:
+            self.violation = True
 
 
 def simpleArithmeticCrossover(parent1,parent2):
-    child1 = Individual()
-    child2 = Individual()
+    child1 = parent1
+    child2 = parent2
 
     genePosition=random.randint(0,parent1.getGeneSize()) # take in size of gene from variable
     for x in range(parent1.getGeneSize()):
@@ -215,23 +265,74 @@ def main(generation_count,pop_size):
     pop = Population(popSize,1)
     for y in range(generation_count):
         newPop = Population(popSize,0)
-        newPop.insertPopulation(pop.getFittest())
-        print (pop.getFittest().getIndividualGeneArray())
-        print ("Iteration: {} Fitness: {}".format(y, (pop.getFittest().getFitness())))
+        successPop = Population(0,0)
+        success = 0.0
+        array = []
+        successList = []
+        newlist = []
+        #print (pop.getFittest().getIndividualGeneArray())
+        print ("Iteration: {} Fitness: {} Array: {}".format(y, (pop.getFittest().getFitness()), pop.getFittest().getIndividualGeneArray()))
         for x in range(int(popSize/2)):
-            parent1 = FPS(pop.getPopulation())
-            parent2 = FPS(pop.getPopulation())
+            newlist = []
+            array = []
+            successList = []
+            #parent1 = FPS(pop.getPopulation())
+            #parent2 = FPS(pop.getPopulation())
+            parent1 = pop.getParent()
+            parent2 = pop.getParent()
             child1,child2 = simpleArithmeticCrossover(parent1,parent2)
-            #Mutation(child1,y)
-            #Mutation(child2,y)
 
-            #fitness4 = child2.getFitness()
-            newPop.insertPopulation(child1)
-            newPop.insertPopulation(child2)
+            if (y > 0) and (x > 0):
+                child1 = Mutation2(child1,y,success/x,successPop)
+                child2 = Mutation2(child2,y,success/x,successPop)
+            else:
+                child1 = parent1
+                child2 = parent2
+
+            if (child1.getFitness() < parent1.getFitness()):
+                #print (child1.getFitness(), parent1.getFitness())
+                #print (child1.getFitness(), child1.getIndividualGeneArray(), parent1.getFitness(), parent1.getIndividualGeneArray())
+                success += 1
+
+            #print (child2.getFitness(), child2.getIndividualGeneArray(), parent2.getFitness(), parent2.getIndividualGeneArray())
+
+            if (child2.getFitness() < parent2.getFitness()):
+                #print (child2.getFitness(), parent2.getFitness())
+                #print (child2.getFitness(), child2.getIndividualGeneArray(), parent2.getFitness(), parent2.getIndividualGeneArray())
+                success += 1
+
+            array.append(parent1)
+            array.append(parent2)
+            array.append(child1)
+            array.append(child2)
+            newlist = sorted(array, key=lambda Individual: Individual.fitness, reverse=False)
+            for _ in newlist:
+                if y < 2:
+                    print (_.getIndividualGeneArray(), _.getFitness())
+                    pass
+                if _.getFitness() < 100:
+                    successList.append(_)
+            else:
+                if y<2:
+                    print ("new set")
+
+            #print (newlist[0].fitness, newlist[1].fitness, newlist[2].fitness, newlist[3].fitness)
+            newPop.insertPopulation(newlist[0])
+            newPop.insertPopulation(newlist[1])
             #os.system("echo \"P1:{} P2:{} C1:{} C2:{}\" >> testing.txt".format(fitness1, fitness2, fitness3, fitness4))
         else:
+            newlist = []
             # replace the entire population with newly generated children
             pop = newPop
+            #pop.insertPopulation(newPop.getFittest())
+            print(pop.getPopulationParameterStdDev()) #Update the mean
+
+            newsuccessPop = Population(len(successList),0)
+            successPop = newsuccessPop
+            for _ in successList:
+                successPop.insertPopulation(_)
+                #print (_.getIndividualGeneArray())
+            successPop.getPopulationParameterStdDev()
 
 
 # PARENT SELECTION ALGORITHM #
@@ -245,38 +346,37 @@ def FPS(pop):
         if current > pick:
             return c
 
-main(1000,100)
+def Mutation2(parent, iteration, success_rate, population):
+    child = parent
+    c = random.uniform(0.87,1.0)
 
-def checkConstraint():
-    fitness = 0.0
-    violation = False
-    w=0.051653711770636
-    d=0.355867916029741
-    L=11.338963731041684
+    for _ in range(child.getGeneSize()):
+        sigma = population.getPopulationStdDev(_)
+        mu = population.mean[_]
+        if iteration%10 == 0:
+            if success_rate > 0.2:
+                sigma = sigma/c
+            elif success_rate < 0.2:
+                sigma = sigma * c
+            elif success_rate == 0.2:
+                sigma = sigma
+        else:
+            sigma = sigma
 
-    g1 = 1 - ((math.pow(d,3) * L) / (71785*math.pow(w,4)))
-    print ((math.pow(d,3) * L))
-    print ((7178*math.pow(w,4)))
-    g2 = 1 - ((140.45 * w) / (math.pow(d,2)*L))
-    g3 = ((w*d)/1.5) - 1
-    #g4 = ((d*((4*d) - w))/(math.pow(w,3)*((12566*d) - w))) + (1/(5108*math.pow(w,2))) - 1
-    g4 = (((4*math.pow(d,2))-(w*d))/((12566*math.pow(w,3)*d)-(12566 * math.pow(w,4)))) + (1/(5108*math.pow(w,2))) - 1
-    print (g1,g2,g3,g4)
+        #num = random.gauss(mu, sigma) * sigma
+        num = (random.uniform(0,1)) * np.random.normal(mu, sigma)
+        RandomgeneValue = child.getIndividualGene(_) + num
+        child.setParticularGene(_, RandomgeneValue)
+        #print ("Gene {}: {} After: {}".format(_,num,RandomgeneValue))
 
-    if g1 > 0:
-        print ("rule 1")
-        violation = True
-    elif g2 > 0:
-        print ("rule 2")
-        violation = True
-    elif g3 > 0:
-        print ("rule 3")
-        violation = True
-    elif g4 > 0:
-        print ("rule 4")
-        violation = True
+    return child
 
-    fitness = (L + 2 )*(math.pow(w,2))*d
+def debug_check():
+    valueArray = [0.051653711770636,11.338963731041684,0.355867916029741]
+    dut = Individual()
+    dut.setIndividualGene(valueArray)
+    print (dut.getIndividualGeneArray())
+    print (dut.getFitness())
 
-    print (violation, fitness)
-    print (random.uniform(0,1))
+main(30,100)
+#debug_check()
