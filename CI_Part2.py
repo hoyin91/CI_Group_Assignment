@@ -6,7 +6,6 @@ import skfuzzy as fuzz
 import copy
 
 recombinationVar = 0.7
-#popSize = 30
 
 class Population:
 
@@ -22,8 +21,6 @@ class Population:
             for _ in range(popSize):
                 self.ind = Individual()
                 self.insertPopulation(self.ind)
-            else:
-                print ("done initialization")
 
     # destructor to clean up those value when we reassign those param
     def __del__(self):
@@ -53,7 +50,6 @@ class Population:
         fittestInd = self.getIndividual(0)
         for _ in range(self.popSize):
             if (fittestInd.getFitness() > self.getIndividual(_).getFitness()):
-                #print ("Updating fittest, ori.fitness: {} new.fitness: {}".format(fittestInd.getFitness(),self.getIndividual(_).getFitness()))
                 fittestInd = self.getIndividual(_)
         
         return fittestInd
@@ -102,11 +98,18 @@ class Population:
             ind = Individual()
             for _ in range(ind.getGeneSize()):
                 self.getPopulationStdDev(_)
-
-            #print (self.stdev)
             return self.stdev
         except:
             return 999999.9
+
+    def getPopulationFitnessDetail(self):
+        ind_fitness_array = []
+        for _ in range(self.popSize):
+            ind_fitness_array.append(self.getIndividual(_).getFitness())
+        else:
+            data_to_write = str(np.std(ind_fitness_array)) + "\t" + str(np.mean(ind_fitness_array)) + "\t" +str(max(ind_fitness_array))
+            os.system("echo {} >> P2_stat.txt".format(data_to_write))
+            print (np.std(ind_fitness_array), np.mean(ind_fitness_array), max(ind_fitness_array))
 
 class Individual:
 
@@ -198,7 +201,7 @@ class Individual:
         
         return self.fitness
 
-    def checkConstraint(self):
+    def checkConstraint(self, write_to_file=False):
         self.violation = False
         w=self.getWidth()
         L=self.getLength()
@@ -207,8 +210,12 @@ class Individual:
         g1 = 1 - ((math.pow(d,3) * L) / (71785*math.pow(w,4))) 
         g2 = 1 - ((140.45 * w) / (math.pow(d,2)*L))
         g3 = ((w*d)/1.5) - 1
-        #g4 = ((d*((4*d) - w))/(math.pow(w,3)*((12566*d) - w))) + (1/(5108*math.pow(w,2))) - 1
         g4 = (((4*math.pow(d,2))-(w*d))/((12566*math.pow(w,3)*d)-(12566 * math.pow(w,4)))) + (1/(5108*math.pow(w,2))) - 1
+
+        # write to file if and only if call by user
+        if write_to_file:
+            data_to_write = "{} {} {} {}".format(g1, g2, g3, g4)
+            os.system("echo {} >> P2_constraints.txt".format(data_to_write))
 
         if g1 > 0:
             self.violation = True
@@ -220,125 +227,27 @@ class Individual:
             self.violation = True
 
 
-def simpleArithmeticCrossover(parent1,parent2):
+def simpleArithmeticCrossover(parent1,parent2,iteration, population):
+    sigma = copy.deepcopy(population.getPopulationStdDev(0))
+    recombinationVar = fuzzy_system(iteration, sigma)
     child1 = copy.deepcopy(parent1)
     child2 = copy.deepcopy(parent2)
-    #print (child1.getIndividualGeneArray())
+
     genePosition=random.randint(0,parent1.getGeneSize()-1) # take in size of gene from variable
     for x in range(parent1.getGeneSize()):
         if x >= genePosition:
             geneValue1 = ((recombinationVar*parent2.getIndividualGene(x))+((1-recombinationVar)*parent1.getIndividualGene(x)))
             geneValue2 = ((recombinationVar*parent1.getIndividualGene(x))+((1-recombinationVar)*parent2.getIndividualGene(x)))
-            #geneValue2 = parent1.getIndividualGene(x)
-            #geneValue1 = parent2.getIndividualGene(x)
             child1.setParticularGene(x,geneValue1)
             child2.setParticularGene(x,geneValue2)
         else:
             child1.setParticularGene(x,parent1.getIndividualGene(x))
             child2.setParticularGene(x,parent2.getIndividualGene(x))
-    #print (child1.getIndividualGeneArray())
     # return both children
     return child1,child2
 
-# MUTATION ALGORITHM
-def Mutation(parent,iteration):
-    # Init child1 as parent to undergo mutation
-    #child = copy.deepcopy(parent)
-    child = parent
-    ProbOfMutation = random.random()
-    
-    # init mu and sigma
-    mu,sigma = 0,0.1
-
-    if iteration < 1500*0.2:
-        mu, sigma = 0, 0.5
-    elif iteration > 1500*0.2:
-        mu, sigma = 0, 0.1
-
-    for _ in range(child.getGeneSize()):
-        if (ProbOfMutation > 0.05):
-            RandomgeneValue = child.getIndividualGene(_) + num
-            #print ("MR: {} Gene @ {}: to geneVal: {}".format(child.getIndividualGene(_),_,RandomgeneValue))
-            child.setParticularGene(_, RandomgeneValue)
-
-    return child
-
-# Main function at here!
-def main(generation_count,pop_size):
-    popSize = pop_size
-    pop = Population(popSize,1)
-    for y in range(generation_count):
-        newPop = Population(popSize,0)
-        successPop = Population(0,0)
-        success = 0.0
-        array = []
-        successList = []
-        newlist = []
-        fittestoftheloop = copy.deepcopy(pop.getFittest())
-        newPop.insertPopulation(fittestoftheloop)
-        print ("Iteration: {} Fitness: {} Array: {} stddev: {}".format(y, fittestoftheloop.getFitness(), fittestoftheloop.getIndividualGeneArray(), pop.getPopulationParameterStdDev()))
-        os.system("echo {} >> result.txt".format(fittestoftheloop.getFitness()))
-        for x in range(int(popSize/2)):
-            newlist = []
-            successList = []
-            #parent1 = FPS(pop.getPopulation())
-            #arent2 = FPS(pop.getPopulation())
-            parent1 = pop.getParent()
-            parent2 = pop.getParent()
-
-            child1,child2 = simpleArithmeticCrossover(parent1,parent2)
-
-            # Mutate the child based on the successrate and std dev
-            if (y > 0) and (x > 0):
-                child1 = Mutation2(child1,y,success/x,successPop)
-                child2 = Mutation2(child2,y,success/x,successPop)
-            else:
-                child1 = parent1
-                child2 = parent2
-
-            # check if child is fitter than its parent or not
-            # if yes, increase the counter for the prob success mutation
-            #print (child1.getFitness(), parent1.getFitness())
-            if (child1.getFitness() < parent1.getFitness()):
-                newPop.insertPopulation(child1)
-                success += 1
-            else:
-                newPop.insertPopulation(parent1)
-
-            if (child2.getFitness() < parent2.getFitness()):
-                newPop.insertPopulation(child2)
-                success += 1
-            else:
-                newPop.insertPopulation(parent2)
-        else:
-            # clear the array of sorted fitness individual after each loop
-            newlist = []
-            # replace the entire population with newly generated children'
-            pop = copy.deepcopy(newPop)
-            pop.getPopulationParameterStdDev() #Update the mean
-            #print (pop.getFittest().getIndividualGeneArray())
-            newsuccessPop = Population(len(successList),0)
-            successPop = newsuccessPop
-            for _ in successList:
-                successPop.insertPopulation(_)
-                #print (_.getIndividualGeneArray(), _.getFitness())
-            else:
-                # update the std deviation of the fit population
-                successPop.getPopulationParameterStdDev()
-
-
-# PARENT SELECTION ALGORITHM #
-# return the parent based on its fitness proportional selection
-def FPS(pop):
-    max = sum(c.getFitness() for c in pop)
-    pick = random.uniform(0, max)
-    current = 0.0
-    for c in pop:
-        current += c.fitness
-        if current > pick:
-            return c
-
-def Mutation2(parent, iteration, success_rate, population):
+# Mutation Algorithm
+def Mutation(parent, iteration, success_rate, population):
     child = copy.deepcopy(parent)
     c = random.uniform(0.87,1.0)
 
@@ -355,36 +264,32 @@ def Mutation2(parent, iteration, success_rate, population):
         else:
             sigma = sigma
 
-        num = random.gauss(mu, sigma) * sigma
-        #num = (random.uniform(0,1)) * np.random.normal(mu, sigma)
-        if sigma:
-            num = fuzzy_system(iteration, sigma)
-        else:
-            # since the std is 0, stop mutation
-            num = 0.0
-
+        num = random.uniform(0,1) * random.gauss(mu, sigma) * sigma
         RandomgeneValue = child.getIndividualGene(_) - num
         child.setParticularGene(_, RandomgeneValue)
-        #print ("Gene {}: {} After: {}".format(_,num,RandomgeneValue))
 
     return child
 
 # fuzzy function
 def fuzzy_system(generation_val,convergence_val):
+    # just to ensure that value excceding 1 will be taken care by the code.
+    if (convergence_val>1):
+        convergence_val = 0.99
+
     x_generation = np.arange(0, 1500, 50)
     x_convergence = np.arange(0, 1, 0.1)
     x_recombinationRate  = np.arange(0, 0.5, 0.1)
 
     # Generate fuzzy membership functions
-    generation_lo = fuzz.trapmf(x_generation, [0, 0, 300,500])
-    generation_md = fuzz.trimf(x_generation, [500, 750, 1000])
-    generation_hi = fuzz.trapmf(x_generation, [1000, 1200, 1500,1500])
+    generation_lo = fuzz.trapmf(x_generation, [0, 0, 200,300])
+    generation_md = fuzz.trimf(x_generation, [290, 550, 700])
+    generation_hi = fuzz.trapmf(x_generation, [690, 700, 1500,1500])
     convergence_lo = fuzz.trapmf(x_convergence, [0, 0, 0.2,0.3])
     convergence_md = fuzz.trapmf(x_convergence, [0.25, 0.4,0.6, 0.75])
     convergence_hi = fuzz.trapmf(x_convergence, [0.7, 0.8, 1,1])
-    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.15,0.2])
-    recom_md = fuzz.trapmf(x_recombinationRate, [0.15, 0.2, 0.3, 0.35])
-    recom_hi = fuzz.trapmf(x_recombinationRate, [0.3, 0.4, 0.5,0.5])
+    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.3,0.4])
+    recom_md = fuzz.trapmf(x_recombinationRate, [0.35, 0.5, 0.5, 0.7])
+    recom_hi = fuzz.trapmf(x_recombinationRate, [0.7, 0.9, 1,1])
 
     generation_level_lo = fuzz.interp_membership(x_generation, generation_lo, generation_val)
     generation_level_md = fuzz.interp_membership(x_generation, generation_md, generation_val)
@@ -394,20 +299,24 @@ def fuzzy_system(generation_val,convergence_val):
     convergence_level_md = fuzz.interp_membership(x_convergence, convergence_md, convergence_val)
     convergence_level_hi = fuzz.interp_membership(x_convergence, convergence_hi, convergence_val)
 
-    active_rule1 = np.fmax(generation_level_hi, convergence_level_hi)
-    rate_activation_lo = np.fmin(active_rule1, recom_lo)
+    # if generation level is high, recombination is low, do nothing to explore
+    rate_activation_lo = np.fmin(generation_level_hi, recom_lo)
 
-    active_rule2 = np.fmax(generation_level_md,convergence_level_md)
-    rate_activation_md = np.fmin(active_rule2,recom_md)
-
-    active_rule3 = np.fmin(generation_level_lo,convergence_level_md)
-    active_rule4 = np.fmin(active_rule3, np.fmin(generation_level_lo, convergence_level_lo))
-    rate_activation_hi = np.fmin(active_rule4, recom_hi)
+    # if generation is medium and convergence is low, recombination is medium: Try to boost the exploration
+    active_rule1 = np.fmin(generation_level_md, fuzz.fuzzy_not(convergence_level_lo))
+    rate_activation_md = np.fmin(active_rule1,recom_md)
+    
+    # if generation is not high, give high recombination
+    active_rule2 = np.fmax(fuzz.fuzzy_not(generation_level_hi), convergence_level_hi)
+    rate_activation_hi = np.fmin(active_rule2, recom_hi)
 
     aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
-    recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
 
-    #print("recombination rate = "+str(recom_rate))
+    try:
+        recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
+    except:
+        recom_rate = 0.25
+
     return recom_rate
 
 def debug_check():
@@ -417,5 +326,52 @@ def debug_check():
     print (dut.getIndividualGeneArray())
     print (dut.getFitness())
 
-main(500,100)
+# Main function at here!
+def main(generation_count,pop_size):
+    popSize = pop_size
+    pop = Population(popSize,1)
+    for y in range(generation_count):
+        newPop = Population(popSize,0)
+        successPop = Population(0,0)
+        success = 0.0
+        fittestoftheloop = copy.deepcopy(pop.getFittest())
+        newPop.insertPopulation(fittestoftheloop)
+        print ("Iteration: {} Fitness: {} Array: {} stddev: {}".format(y, fittestoftheloop.getFitness(), fittestoftheloop.getIndividualGeneArray(), pop.getPopulationParameterStdDev()))
+        os.system("echo {} >> result_2.txt".format(fittestoftheloop.getFitness()))
+        for x in range(int(popSize/2)):
+            parent1 = pop.getParent()
+            parent2 = pop.getParent()
+
+            child1,child2 = simpleArithmeticCrossover(parent1,parent2,y,pop)
+            # Mutate the child based on the successrate and std dev
+            if (y > 0) and (x > 0):
+                child1 = Mutation(child1,y,success/x,successPop)
+                child2 = Mutation(child2,y,success/x,successPop)
+            else:
+                child1 = parent1
+                child2 = parent2
+
+            # check if child is fitter than its parent or not
+            # if yes, increase the counter for the prob success mutation
+            if (child1.getFitness() < parent1.getFitness()):
+                newPop.insertPopulation(child1)
+                success += 1
+            else:
+                newPop.insertPopulation(parent1)
+
+            if (child2.getFitness() < parent2.getFitness()):
+                newPop.insertPopulation(child2)
+                success += 1
+            else:
+                newPop.insertPopulation(parent2)
+        else:
+            # replace the entire population with newly generated children'
+            pop = copy.deepcopy(newPop)
+            pop.getPopulationParameterStdDev() #Update the mean
+            pop.getPopulationFitnessDetail()
+    else:
+        # write the constraint to a file
+        pop.getFittest().checkConstraint(True)
+
+main(1000,100)
 #debug_check()
