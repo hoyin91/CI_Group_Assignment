@@ -99,7 +99,16 @@ class Population:
                 self.getPopulationStdDev(_)
             return self.stdev
         except:
-            return 0.01
+            return 999999.9
+
+    def getPopulationFitnessDetail(self):
+        ind_fitness_array = []
+        for _ in range(self.popSize):
+            ind_fitness_array.append(self.getIndividual(_).getFitness())
+        else:
+            data_to_write = str(np.std(ind_fitness_array)) + "\t" + str(np.mean(ind_fitness_array)) + "\t" +str(max(ind_fitness_array))
+            os.system("echo {} >> P3_stat.txt".format(data_to_write))
+            print (np.std(ind_fitness_array), np.mean(ind_fitness_array), max(ind_fitness_array))
 
 class Individual:
 
@@ -200,7 +209,7 @@ class Individual:
 
         return self.fitness
 
-    def checkConstraint(self):
+    def checkConstraint(self,write_to_file=False):
         self.violation = False
         ts=self.getThickness()
         th=self.getThicknessHead()
@@ -212,7 +221,12 @@ class Individual:
         g3 = ((-math.pi*math.pow(R,2)*L)-(((4*math.pi)/3)*math.pow(R,3))+1296000)
         g4 = (L - 240) 
 
-        if  g1 > 0 :
+        # write to file if and only if call by user
+        if write_to_file:
+            data_to_write = "{} {} {} {}".format(g1, g2, g3, g4)
+            os.system("echo {} >> P3_constraints.txt".format(data_to_write))
+
+        if g1 > 0 :
             self.violation=True
         elif g2 > 0:
             self.violation=True
@@ -364,6 +378,11 @@ def main(generation_count,pop_size):
             # replace the entire population with newly generated children'
             pop = copy.deepcopy(newPop)
             pop.getPopulationParameterStdDev() #Update the mean
+            pop.getPopulationFitnessDetail()
+    else:
+        # write the constraint to a file
+        pop.getFittest().checkConstraint(True)
+
 
 main(1000,100)
 #debug_check()

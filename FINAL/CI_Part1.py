@@ -102,6 +102,16 @@ class Population:
         except:
             return 999999.9
 
+    def getPopulationFitnessDetail(self):
+        ind_fitness_array = []
+        for _ in range(self.popSize):
+            ind_fitness_array.append(self.getIndividual(_).getFitness())
+        else:
+            data_to_write = str(np.std(ind_fitness_array)) + "\t" + str(np.mean(ind_fitness_array)) + "\t" +str(max(ind_fitness_array))
+            os.system("echo {} >> P1_stat.txt".format(data_to_write))
+            print (np.std(ind_fitness_array), np.mean(ind_fitness_array), max(ind_fitness_array))
+
+
 class Individual:
 
     # Init gene with random value, each individual has 4 genes
@@ -204,7 +214,7 @@ class Individual:
 
         return self.fitness
 
-    def checkConstraint(self):
+    def checkConstraint(self,write_to_file=False):
         self.violation = False
         h=self.getWidth()
         w=self.getLength()
@@ -221,19 +231,32 @@ class Individual:
         tx = math.sqrt(math.pow(a,2)+((a*b*L)/D)+math.pow(b,2))
         px = 64746.022*(1-(0.0282346*d))*h*math.pow(d,3)
 
-        if (w - h) > 0 :
+        g1 = (w - h)
+        g2 = (sx - 0.25)
+        g3 = (tx - 13600)
+        g4 = (ax - 30000)
+        g5 = ((0.10471*math.pow(w,2)) + (0.04811*h*d*(14+L)) - 5)
+        g6 = (0.125 - w)
+        g7 = (6000 - px)
+
+        # write to file if and only if call by user
+        if write_to_file:
+            data_to_write = "{} {} {} {} {} {} {}".format(g1, g2, g3, g4, g5, g6, g7)
+            os.system("echo {} >> P1_constraints.txt".format(data_to_write))
+
+        if g1 > 0 :
             self.violation=True
-        elif (sx - 0.25) > 0:
+        elif g2 > 0:
             self.violation=True
-        elif (tx - 13600) > 0:
+        elif g3 > 0:
             self.violation=True
-        elif (ax - 30000) > 0:
+        elif g4 > 0:
             self.violation = True
-        elif ((0.10471*math.pow(w,2)) + (0.04811*h*d*(14+L)) - 5) > 0:
+        elif g5 > 0:
             self.violation = True
-        elif (0.125 - w) > 0:
+        elif g6 > 0:
             self.violation = True
-        elif (6000 - px) > 0:
+        elif g7 > 0:
             self.violation = True
 
 
@@ -298,6 +321,7 @@ def main(generation_count,pop_size):
         fittestoftheloop = copy.deepcopy(pop.getFittest())
         newPop.insertPopulation(fittestoftheloop)
         print ("Iteration: {} Fitness: {} Array: {} stddev: {}".format(y, fittestoftheloop.getFitness(), fittestoftheloop.getIndividualGeneArray(), pop.getPopulationParameterStdDev()))
+        
         os.system("echo {} >> result_1.txt".format(fittestoftheloop.getFitness()))
         for x in range(int(popSize/2)):
             parent1 = pop.getParent()
@@ -331,6 +355,10 @@ def main(generation_count,pop_size):
             # replace the entire population with newly generated children'
             pop = copy.deepcopy(newPop)
             pop.getPopulationParameterStdDev() #Update the mean
+            pop.getPopulationFitnessDetail()
+    else:
+        # write the constraint to a file
+        pop.getFittest().checkConstraint(True)
 
 # fuzzy function
 def fuzzy_system(generation_val,convergence_val):
