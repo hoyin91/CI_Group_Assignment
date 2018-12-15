@@ -2,6 +2,8 @@ import random
 import numpy as np
 import math
 import os
+import skfuzzy as fuzz
+
 
 recombinationVar = 0.7
 popSize = 30
@@ -20,6 +22,8 @@ class Population:
             for _ in range(popSize):
                 self.ind = Individual()
                 self.insertPopulation(self.ind)
+            else:
+                print ("done initialization")
 
     # destructor to clean up those value when we reassign those param
     def __del__(self):
@@ -30,7 +34,9 @@ class Population:
     # generate population (array)
     def insertPopulation(self,ind):
         self.pop.append(ind)
-        
+        #print ("inserted!")
+        #print (ind.getIndividualGeneArray(), ind.getFitness())
+
     # return population (Array of float)
     def getPopulation(self):
         return self.pop
@@ -41,17 +47,23 @@ class Population:
         self.pop[indIndex] = self.ind.getIndividualGene()
 
     def getIndividual(self,index):
-        if index <= self.popSize:
+        if index < self.popSize:
             return self.pop[index]
 
     def getFittest(self):
         # Loop through individuals to find fittest
-        fittest = self.getIndividual(0)
+        # print("checking for fittest ind")
+        # print ("Checking fittest")
+        fittestInd = self.getIndividual(0)
         for _ in range(self.popSize):
-            if (fittest.getFitness() > self.getIndividual(_).getFitness()):
-                fittest = self.getIndividual(_)
+            #print (self.getIndividual(_).getFitness())
+            if (fittestInd.getFitness() > self.getIndividual(_).getFitness()):
+                #print ("Updating fittest, ori.fitness: {} new.fitness: {}".format(fittestInd.getFitness(),self.getIndividual(_).getFitness()))
+                fittestInd = self.getIndividual(_)
+            #else:
+            #    print ("No UPDATE - Current fitness: {} Comparing fitness: {}".format(fittestInd.getFitness(),self.getIndividual(_).getFitness()))
         
-        return fittest;
+        return fittestInd
 
     def getParticularIndividualFitness(self,index):
         if index <= self.popSize:
@@ -86,7 +98,6 @@ class Population:
         return self.variance[geneIndex]
 
     def getPopulationStdDev(self,geneIndex):
-        array = []
         if not self.stdev[geneIndex]:
             for _ in range(self.popSize):
                 self.stdev[geneIndex] = math.sqrt(self.getPopulationVariance(geneIndex))
@@ -102,7 +113,7 @@ class Population:
             #print (self.stdev)
             return self.stdev
         except:
-            return 0.0001
+            return 999999.9
 
 class Individual:
 
@@ -184,7 +195,7 @@ class Individual:
         return self.depth
 
     def getFitness(self):
-        fitness = 9999
+        self.fitness = 9999
         self.checkConstraint()
 
         # if any parameter violate, return 9999 directly
@@ -270,8 +281,8 @@ def main(generation_count,pop_size):
         array = []
         successList = []
         newlist = []
-        #print (pop.getFittest().getIndividualGeneArray())
-        print ("Iteration: {} Fitness: {} Array: {}".format(y, (pop.getFittest().getFitness()), pop.getFittest().getIndividualGeneArray()))
+        fittestoftheloop = pop.getFittest()
+        print ("Iteration: {} Fitness: {} Array: {}".format(y, (fittestoftheloop.getFitness()), fittestoftheloop.getIndividualGeneArray()))
         for x in range(int(popSize/2)):
             newlist = []
             array = []
@@ -282,57 +293,76 @@ def main(generation_count,pop_size):
             parent2 = pop.getParent()
             child1,child2 = simpleArithmeticCrossover(parent1,parent2)
 
+            # Mutate the child based on the successrate and std dev
             if (y > 0) and (x > 0):
                 child1 = Mutation2(child1,y,success/x,successPop)
                 child2 = Mutation2(child2,y,success/x,successPop)
+                #child1 = Mutation2(parent1,y,success/x,successPop)
+                #child2 = Mutation2(parent2,y,success/x,successPop)
             else:
                 child1 = parent1
                 child2 = parent2
 
+            # check if child is fitter than its parent or not
+            # if yes, increase the counter for the prob success mutation
             if (child1.getFitness() < parent1.getFitness()):
-                #print (child1.getFitness(), parent1.getFitness())
-                #print (child1.getFitness(), child1.getIndividualGeneArray(), parent1.getFitness(), parent1.getIndividualGeneArray())
                 success += 1
-
-            #print (child2.getFitness(), child2.getIndividualGeneArray(), parent2.getFitness(), parent2.getIndividualGeneArray())
 
             if (child2.getFitness() < parent2.getFitness()):
-                #print (child2.getFitness(), parent2.getFitness())
-                #print (child2.getFitness(), child2.getIndividualGeneArray(), parent2.getFitness(), parent2.getIndividualGeneArray())
                 success += 1
+
+            #print (child1.getFitness(), parent1.getFitness(), child1.getIndividualGeneArray(), parent2.getIndividualGeneArray())
+            #print (child2.getFitness(), parent2.getFitness(), child2.getIndividualGeneArray(), parent2.getIndividualGeneArray())
 
             array.append(parent1)
             array.append(parent2)
             array.append(child1)
             array.append(child2)
             newlist = sorted(array, key=lambda Individual: Individual.fitness, reverse=False)
-            for _ in newlist:
-                if y < 2:
-                    print (_.getIndividualGeneArray(), _.getFitness())
-                    pass
-                if _.getFitness() < 100:
-                    successList.append(_)
-            else:
-                if y<2:
-                    print ("new set")
+            #for _ in newlist:
+            #    if y < 2:
+            #        #print (_.getIndividualGeneArray(), _.getFitness())
+            #    if _.getFitness() < 1000:
+            #        successList.append(_)
 
-            #print (newlist[0].fitness, newlist[1].fitness, newlist[2].fitness, newlist[3].fitness)
+            print (newlist[0].fitness, newlist[1].fitness, newlist[2].fitness, newlist[3].fitness)
+            #print (newlist[0].fitness, newlist[1].fitness)
             newPop.insertPopulation(newlist[0])
             newPop.insertPopulation(newlist[1])
             #os.system("echo \"P1:{} P2:{} C1:{} C2:{}\" >> testing.txt".format(fitness1, fitness2, fitness3, fitness4))
         else:
+            # clear the array of sorted fitness individual after each loop
             newlist = []
-            # replace the entire population with newly generated children
+            # replace the entire population with newly generated children'
+            newPop.insertPopulation(pop.getFittest())
             pop = newPop
-            #pop.insertPopulation(newPop.getFittest())
-            print(pop.getPopulationParameterStdDev()) #Update the mean
+            pop.insertPopulation(newPop.getFittest())
+            #for _ in range(pop.popSize):
+            #   print (pop.getIndividual(_).getFitness(), pop.getIndividual(_).getIndividualGeneArray())
+            #print ("Showing new pop")
+            #for _ in range(pop.popSize):
+#                print (pop.getIndividual(_).getIndividualGeneArray(), pop.getIndividual(_).getFitness())
+##            else:
+ #               print ("## fitness of the new pop ##")
+ ##               print (newPop.getFittest().getIndividualGeneArray(), newPop.getIndividual(_).getFitness())
+  ##              print (pop.getFittest().getIndividualGeneArray(), pop.getIndividual(_).getFitness())
+   #             print ("## end ##")
+            #print ("check on the fitness of both population")
+            #for _ in range(popSize):
+            #   print(newPop.getIndividual(_).getFitness())
 
+            #pop.insertPopulation(newPop.getFittest())
+            pop.getPopulationParameterStdDev() #Update the mean
+            #print (pop.getFittest().getIndividualGeneArray())
             newsuccessPop = Population(len(successList),0)
             successPop = newsuccessPop
             for _ in successList:
                 successPop.insertPopulation(_)
-                #print (_.getIndividualGeneArray())
-            successPop.getPopulationParameterStdDev()
+                #print (_.getIndividualGeneArray(), _.getFitness())
+            else:
+                # update the std deviation of the fit population
+                successPop.getPopulationParameterStdDev()
+                #print (successPop.getPopulationParameterStdDev())
 
 
 # PARENT SELECTION ALGORITHM #
@@ -364,12 +394,59 @@ def Mutation2(parent, iteration, success_rate, population):
             sigma = sigma
 
         #num = random.gauss(mu, sigma) * sigma
-        num = (random.uniform(0,1)) * np.random.normal(mu, sigma)
-        RandomgeneValue = child.getIndividualGene(_) + num
+        #num = (random.uniform(0,1)) * np.random.normal(mu, sigma)
+        if sigma:
+            num = fuzzy_system(iteration, sigma)
+        else:
+            # since the std is 0, stop mutation
+            num = 0.0
+
+        RandomgeneValue = child.getIndividualGene(_) - num
         child.setParticularGene(_, RandomgeneValue)
         #print ("Gene {}: {} After: {}".format(_,num,RandomgeneValue))
 
     return child
+
+# fuzzy function
+def fuzzy_system(generation_val,convergence_val):
+    x_generation = np.arange(0, 1500, 50)
+    x_convergence = np.arange(0, 1, 0.1)
+    x_recombinationRate  = np.arange(0, 0.5, 0.1)
+
+    # Generate fuzzy membership functions
+    generation_lo = fuzz.trapmf(x_generation, [0, 0, 300,500])
+    generation_md = fuzz.trimf(x_generation, [500, 750, 1000])
+    generation_hi = fuzz.trapmf(x_generation, [1000, 1200, 1500,1500])
+    convergence_lo = fuzz.trapmf(x_convergence, [0, 0, 0.2,0.3])
+    convergence_md = fuzz.trapmf(x_convergence, [0.25, 0.4,0.6, 0.75])
+    convergence_hi = fuzz.trapmf(x_convergence, [0.7, 0.8, 1,1])
+    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.15,0.2])
+    recom_md = fuzz.trapmf(x_recombinationRate, [0.15, 0.2, 0.3, 0.35])
+    recom_hi = fuzz.trapmf(x_recombinationRate, [0.3, 0.4, 0.5,0.5])
+
+    generation_level_lo = fuzz.interp_membership(x_generation, generation_lo, generation_val)
+    generation_level_md = fuzz.interp_membership(x_generation, generation_md, generation_val)
+    generation_level_hi = fuzz.interp_membership(x_generation, generation_hi, generation_val)
+
+    convergence_level_lo = fuzz.interp_membership(x_convergence, convergence_lo, convergence_val)
+    convergence_level_md = fuzz.interp_membership(x_convergence, convergence_md, convergence_val)
+    convergence_level_hi = fuzz.interp_membership(x_convergence, convergence_hi, convergence_val)
+
+    active_rule1 = np.fmax(generation_level_hi, convergence_level_hi)
+    rate_activation_lo = np.fmin(active_rule1, recom_lo)
+
+    active_rule2 = np.fmax(generation_level_md,convergence_level_md)
+    rate_activation_md = np.fmin(active_rule2,recom_md)
+
+    active_rule3 = np.fmin(generation_level_lo,convergence_level_md)
+    active_rule4 = np.fmin(active_rule3, np.fmin(generation_level_lo, convergence_level_lo))
+    rate_activation_hi = np.fmin(active_rule4, recom_hi)
+
+    aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
+    recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
+
+    print("recombination rate = "+str(recom_rate))
+    return recom_rate
 
 def debug_check():
     valueArray = [0.051653711770636,11.338963731041684,0.355867916029741]
@@ -378,5 +455,5 @@ def debug_check():
     print (dut.getIndividualGeneArray())
     print (dut.getFitness())
 
-main(30,100)
+main(5,100)
 #debug_check()
