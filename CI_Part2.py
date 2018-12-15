@@ -6,7 +6,7 @@ import skfuzzy as fuzz
 import copy
 
 recombinationVar = 0.7
-popSize = 30
+#popSize = 30
 
 class Population:
 
@@ -53,8 +53,8 @@ class Population:
         fittestInd = self.getIndividual(0)
         for _ in range(self.popSize):
             if (fittestInd.getFitness() > self.getIndividual(_).getFitness()):
-                print ("Updating fittest, ori.fitness: {} new.fitness: {}".format(fittestInd.getFitness(),self.getIndividual(_).getFitness()))
-                fittestInd = self.getIndividual(_)
+                #print ("Updating fittest, ori.fitness: {} new.fitness: {}".format(fittestInd.getFitness(),self.getIndividual(_).getFitness()))
+                fittestInd = copy.deepcopy(self.getIndividual(_))
         
         return fittestInd
 
@@ -223,12 +223,12 @@ class Individual:
 def simpleArithmeticCrossover(parent1,parent2):
     child1 = copy.deepcopy(parent1)
     child2 = copy.deepcopy(parent2)
-
+    print (child1.getIndividualGeneArray())
     genePosition=random.randint(0,parent1.getGeneSize()) # take in size of gene from variable
     for x in range(parent1.getGeneSize()):
         if x >= genePosition:
-            geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
-            geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
+            geneValue1 = ((recombinationVar*parent2.getIndividualGene(x))+((1-recombinationVar)*parent1.getIndividualGene(x)))
+            geneValue2 = ((recombinationVar*parent1.getIndividualGene(x))+((1-recombinationVar)*parent2.getIndividualGene(x)))
             #geneValue2 = parent1.getIndividualGene(x)
             #geneValue1 = parent2.getIndividualGene(x)
             child1.setParticularGene(x,geneValue1)
@@ -236,7 +236,7 @@ def simpleArithmeticCrossover(parent1,parent2):
         else:
             child1.setParticularGene(x,parent1.getIndividualGene(x))
             child2.setParticularGene(x,parent2.getIndividualGene(x))
-
+    print (child1.getIndividualGeneArray())
     # return both children
     return child1,child2
 
@@ -274,28 +274,32 @@ def main(generation_count,pop_size):
         array = []
         successList = []
         newlist = []
-        fittestoftheloop = pop.getFittest()
+        fittestoftheloop = copy.deepcopy(pop.getFittest())
         pop.insertPopulation(fittestoftheloop)
         print ("Iteration: {} Fitness: {} Array: {}".format(y, (fittestoftheloop.getFitness()), fittestoftheloop.getIndividualGeneArray()))
+        os.system("echo {} >> result.txt".format(fittestoftheloop.getFitness()))
         for x in range(int(popSize/2)):
             newlist = []
             successList = []
             #parent1 = FPS(pop.getPopulation())
             #parent2 = FPS(pop.getPopulation())
             parent1 = pop.getParent()
+            #print ("Before: {}".format(parent1.getFitness()))
+
             parent2 = pop.getParent()
             child1,child2 = simpleArithmeticCrossover(parent1,parent2)
-
+            #print ("After: {}".format(parent1.getFitness()))
             # Mutate the child based on the successrate and std dev
-            if (y > 0) and (x > 0):
-                child1 = Mutation2(child1,y,success/x,successPop)
-                child2 = Mutation2(child2,y,success/x,successPop)
-            else:
-                child1 = parent1
-                child2 = parent2
+            #if (y > 0) and (x > 0):
+            #    child1 = Mutation2(child1,y,success/x,successPop)
+            #    child2 = Mutation2(child2,y,success/x,successPop)
+            #else:
+            #    child1 = copy.deepcopy(parent1)
+            #    child2 = copy.deepcopy(parent2)
 
             # check if child is fitter than its parent or not
             # if yes, increase the counter for the prob success mutation
+            #print (child1.getFitness(), parent1.getFitness())
             if (child1.getFitness() < parent1.getFitness()):
                 newPop.insertPopulation(child1)
                 success += 1
@@ -414,5 +418,5 @@ def debug_check():
     print (dut.getIndividualGeneArray())
     print (dut.getFitness())
 
-main(500,100)
+main(100,100)
 #debug_check()
