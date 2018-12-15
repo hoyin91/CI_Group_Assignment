@@ -54,7 +54,7 @@ class Population:
         for _ in range(self.popSize):
             if (fittestInd.getFitness() > self.getIndividual(_).getFitness()):
                 #print ("Updating fittest, ori.fitness: {} new.fitness: {}".format(fittestInd.getFitness(),self.getIndividual(_).getFitness()))
-                fittestInd = copy.deepcopy(self.getIndividual(_))
+                fittestInd = self.getIndividual(_)
         
         return fittestInd
 
@@ -223,8 +223,8 @@ class Individual:
 def simpleArithmeticCrossover(parent1,parent2):
     child1 = copy.deepcopy(parent1)
     child2 = copy.deepcopy(parent2)
-    print (child1.getIndividualGeneArray())
-    genePosition=random.randint(0,parent1.getGeneSize()) # take in size of gene from variable
+    #print (child1.getIndividualGeneArray())
+    genePosition=random.randint(0,parent1.getGeneSize()-1) # take in size of gene from variable
     for x in range(parent1.getGeneSize()):
         if x >= genePosition:
             geneValue1 = ((recombinationVar*parent2.getIndividualGene(x))+((1-recombinationVar)*parent1.getIndividualGene(x)))
@@ -236,7 +236,7 @@ def simpleArithmeticCrossover(parent1,parent2):
         else:
             child1.setParticularGene(x,parent1.getIndividualGene(x))
             child2.setParticularGene(x,parent2.getIndividualGene(x))
-    print (child1.getIndividualGeneArray())
+    #print (child1.getIndividualGeneArray())
     # return both children
     return child1,child2
 
@@ -275,27 +275,26 @@ def main(generation_count,pop_size):
         successList = []
         newlist = []
         fittestoftheloop = copy.deepcopy(pop.getFittest())
-        pop.insertPopulation(fittestoftheloop)
-        print ("Iteration: {} Fitness: {} Array: {}".format(y, (fittestoftheloop.getFitness()), fittestoftheloop.getIndividualGeneArray()))
+        newPop.insertPopulation(fittestoftheloop)
+        print ("Iteration: {} Fitness: {} Array: {} stddev: {}".format(y, fittestoftheloop.getFitness(), fittestoftheloop.getIndividualGeneArray(), pop.getPopulationParameterStdDev()))
         os.system("echo {} >> result.txt".format(fittestoftheloop.getFitness()))
         for x in range(int(popSize/2)):
             newlist = []
             successList = []
             #parent1 = FPS(pop.getPopulation())
-            #parent2 = FPS(pop.getPopulation())
+            #arent2 = FPS(pop.getPopulation())
             parent1 = pop.getParent()
-            #print ("Before: {}".format(parent1.getFitness()))
-
             parent2 = pop.getParent()
+
             child1,child2 = simpleArithmeticCrossover(parent1,parent2)
-            #print ("After: {}".format(parent1.getFitness()))
+
             # Mutate the child based on the successrate and std dev
-            #if (y > 0) and (x > 0):
-            #    child1 = Mutation2(child1,y,success/x,successPop)
-            #    child2 = Mutation2(child2,y,success/x,successPop)
-            #else:
-            #    child1 = copy.deepcopy(parent1)
-            #    child2 = copy.deepcopy(parent2)
+            if (y > 0) and (x > 0):
+                child1 = Mutation2(child1,y,success/x,successPop)
+                child2 = Mutation2(child2,y,success/x,successPop)
+            else:
+                child1 = parent1
+                child2 = parent2
 
             # check if child is fitter than its parent or not
             # if yes, increase the counter for the prob success mutation
@@ -346,7 +345,7 @@ def Mutation2(parent, iteration, success_rate, population):
     for _ in range(child.getGeneSize()):
         sigma = population.getPopulationStdDev(_)
         mu = population.mean[_]
-        if iteration%10 == 0:
+        if iteration % 50 == 0:
             if success_rate > 0.2:
                 sigma = sigma/c
             elif success_rate < 0.2:
@@ -356,7 +355,7 @@ def Mutation2(parent, iteration, success_rate, population):
         else:
             sigma = sigma
 
-        #num = random.gauss(mu, sigma) * sigma
+        num = random.gauss(mu, sigma) * sigma
         #num = (random.uniform(0,1)) * np.random.normal(mu, sigma)
         if sigma:
             num = fuzzy_system(iteration, sigma)
@@ -418,5 +417,5 @@ def debug_check():
     print (dut.getIndividualGeneArray())
     print (dut.getFitness())
 
-main(100,100)
+main(500,100)
 #debug_check()
