@@ -12,7 +12,6 @@ class Population:
 
     # generate population by the popSize
     def __init__(self,popSize,init):
-        #print ("Constructor called")
         self.popSize = popSize
         self.pop = []
         self.mean = [0.0, 0.0, 0.0]
@@ -31,13 +30,10 @@ class Population:
         self.mean = [0.0, 0.0, 0.0]
         self.stdev = [0.0, 0.0, 0.0]
         self.variance = [0.0, 0.0, 0.0]
-        #print ("destructor")
 
     # generate population (array)
     def insertPopulation(self,ind):
         self.pop.append(ind)
-        #print ("inserted!")
-        #print (ind.getIndividualGeneArray(), ind.getFitness())
 
     # return population (Array of float)
     def getPopulation(self):
@@ -54,16 +50,11 @@ class Population:
 
     def getFittest(self):
         # Loop through individuals to find fittest
-        # print("checking for fittest ind")
-        # print ("Checking fittest")
         fittestInd = self.getIndividual(0)
         for _ in range(self.popSize):
-            #print (self.getIndividual(_).getFitness())
             if (fittestInd.getFitness() > self.getIndividual(_).getFitness()):
-                #print ("Updating fittest, ori.fitness: {} new.fitness: {}".format(fittestInd.getFitness(),self.getIndividual(_).getFitness()))
+                print ("Updating fittest, ori.fitness: {} new.fitness: {}".format(fittestInd.getFitness(),self.getIndividual(_).getFitness()))
                 fittestInd = self.getIndividual(_)
-            #else:
-            #    print ("No UPDATE - Current fitness: {} Comparing fitness: {}".format(fittestInd.getFitness(),self.getIndividual(_).getFitness()))
         
         return fittestInd
 
@@ -232,16 +223,14 @@ class Individual:
 def simpleArithmeticCrossover(parent1,parent2):
     child1 = copy.deepcopy(parent1)
     child2 = copy.deepcopy(parent2)
-    #child1 = parent1
-    #child2 = parent2
 
     genePosition=random.randint(0,parent1.getGeneSize()) # take in size of gene from variable
     for x in range(parent1.getGeneSize()):
         if x >= genePosition:
-            #geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
-            #geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
-            geneValue2 = parent1.getIndividualGene(x)
-            geneValue1 = parent2.getIndividualGene(x)
+            geneValue1 = (recombinationVar*parent2.getIndividualGene(x)+(1-recombinationVar)*parent1.getIndividualGene(x))
+            geneValue2 = (recombinationVar*parent1.getIndividualGene(x)+(1-recombinationVar)*parent2.getIndividualGene(x))
+            #geneValue2 = parent1.getIndividualGene(x)
+            #geneValue1 = parent2.getIndividualGene(x)
             child1.setParticularGene(x,geneValue1)
             child2.setParticularGene(x,geneValue2)
         else:
@@ -268,7 +257,6 @@ def Mutation(parent,iteration):
 
     for _ in range(child.getGeneSize()):
         if (ProbOfMutation > 0.05):
-            #num = random.uniform(0,1)
             RandomgeneValue = child.getIndividualGene(_) + num
             #print ("MR: {} Gene @ {}: to geneVal: {}".format(child.getIndividualGene(_),_,RandomgeneValue))
             child.setParticularGene(_, RandomgeneValue)
@@ -288,10 +276,8 @@ def main(generation_count,pop_size):
         newlist = []
         fittestoftheloop = pop.getFittest()
         pop.insertPopulation(fittestoftheloop)
-        print ("X1 Iteration: {} Fitness: {} Array: {}".format(y, (fittestoftheloop.getFitness()), fittestoftheloop.getIndividualGeneArray()))
+        print ("Iteration: {} Fitness: {} Array: {}".format(y, (fittestoftheloop.getFitness()), fittestoftheloop.getIndividualGeneArray()))
         for x in range(int(popSize/2)):
-            if x==1:
-                print ("X2 Iteration: {} Fitness: {} Array: {}".format(y, (fittestoftheloop.getFitness()), fittestoftheloop.getIndividualGeneArray()))
             newlist = []
             successList = []
             #parent1 = FPS(pop.getPopulation())
@@ -304,8 +290,6 @@ def main(generation_count,pop_size):
             if (y > 0) and (x > 0):
                 child1 = Mutation2(child1,y,success/x,successPop)
                 child2 = Mutation2(child2,y,success/x,successPop)
-                #child1 = Mutation2(parent1,y,success/x,successPop)
-                #child2 = Mutation2(parent2,y,success/x,successPop)
             else:
                 child1 = parent1
                 child2 = parent2
@@ -323,53 +307,11 @@ def main(generation_count,pop_size):
                 success += 1
             else:
                 newPop.insertPopulation(parent2)
-
-            #print (child1.getFitness(), parent1.getFitness(), child1.getIndividualGeneArray(), parent2.getIndividualGeneArray())
-            #print (child2.getFitness(), parent2.getFitness(), child2.getIndividualGeneArray(), parent2.getIndividualGeneArray())
-
-            #array.append(parent1)
-            #array.append(parent2)
-            #array.append(child1)
-            #array.append(child2)
-            #newlist = sorted(array, key=lambda Individual: Individual.fitness, reverse=False)
-            #for _ in newlist:
-            #    if y < 2:
-            #        #print (_.getIndividualGeneArray(), _.getFitness())
-            #    if _.getFitness() < 1000:
-            #        successList.append(_)
-
-            #print (newlist[0].fitness, newlist[1].fitness, newlist[2].fitness, newlist[3].fitness)
-            #print (newlist[0].fitness, newlist[1].fitness)
-            #newPop.insertPopulation(newlist[0])
-            #newPop.insertPopulation(newlist[1])
-            #newPop.insertPopulation(child1)
-            #newPop.insertPopulation(child2)
-            #os.system("echo \"P1:{} P2:{} C1:{} C2:{}\" >> testing.txt".format(fitness1, fitness2, fitness3, fitness4))
         else:
-            print ("X4 Iteration: {} Fitness: {} Array: {}".format(y, (newPop.getFittest().getFitness()), newPop.getFittest().getIndividualGeneArray()))
-
             # clear the array of sorted fitness individual after each loop
             newlist = []
             # replace the entire population with newly generated children'
-            #newPop.insertPopulation(pop.getFittest())
-            #pop = newPop
             pop = copy.deepcopy(newPop)
-            #print ("Done")
-            #for _ in range(pop.popSize):
-            #   print (pop.getIndividual(_).getFitness(), pop.getIndividual(_).getIndividualGeneArray())
-#            print ("Showing new pop")
-#            for _ in range(pop.popSize):
-#                print (pop.getIndividual(_).getIndividualGeneArray(), pop.getIndividual(_).getFitness())
-#            else:
-#               print ("## fitness of the new pop ##")
-#               print (newPop.getFittest().getIndividualGeneArray(), newPop.getIndividual(_).getFitness())
-#               print (pop.getFittest().getIndividualGeneArray(), pop.getIndividual(_).getFitness())
-#              print ("## end ##")
-            #print ("check on the fitness of both population")
-            #for _ in range(popSize):
-            #   print(newPop.getIndividual(_).getFitness())
-
-            #pop.insertPopulation(newPop.getFittest())
             pop.getPopulationParameterStdDev() #Update the mean
             #print (pop.getFittest().getIndividualGeneArray())
             newsuccessPop = Population(len(successList),0)
@@ -380,7 +322,6 @@ def main(generation_count,pop_size):
             else:
                 # update the std deviation of the fit population
                 successPop.getPopulationParameterStdDev()
-                #print (successPop.getPopulationParameterStdDev())
 
 
 # PARENT SELECTION ALGORITHM #
@@ -463,7 +404,7 @@ def fuzzy_system(generation_val,convergence_val):
     aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
     recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
 
-    print("recombination rate = "+str(recom_rate))
+    #print("recombination rate = "+str(recom_rate))
     return recom_rate
 
 def debug_check():
