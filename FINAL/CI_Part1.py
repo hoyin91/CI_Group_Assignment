@@ -219,8 +219,6 @@ class Individual:
         b = (Q*D)/J
         a = 6000/(math.sqrt(2)*w*L)
         tx = math.sqrt(math.pow(a,2)+((a*b*L)/D)+math.pow(b,2))
-        #px = (0.61423*(math.pow(10,6)))*((d*math.pow(h,3))/6)*(1-(math.pow(30/48,1/d)/28))
-        #px = 0.61423*(math.pow(10,6))*((d*math.pow(h,3))/6)*(1- (math.pow(math.exp(1), math.log(30/48)/d)))
         px = 64746.022*(1-(0.0282346*d))*h*math.pow(d,3)
 
         if (w - h) > 0 :
@@ -240,8 +238,8 @@ class Individual:
 
 
 def simpleArithmeticCrossover(parent1,parent2,iteration, population):
-    #sigma = copy.deepcopy(population.getPopulationStdDev(0))
-    #recombinationVar = fuzzy_system(iteration, sigma)
+    sigma = copy.deepcopy(population.getPopulationStdDev(0))
+    recombinationVar = fuzzy_system(iteration, sigma)
     child1 = copy.deepcopy(parent1)
     child2 = copy.deepcopy(parent2)
 
@@ -281,57 +279,6 @@ def Mutation(parent, iteration, success_rate, population):
         child.setParticularGene(_, RandomgeneValue)
 
     return child
-
-# fuzzy function
-def fuzzy_system(generation_val,convergence_val):
-    if (convergence_val>1):
-        convergence_val = 0.99
-
-    x_generation = np.arange(0, 1500, 50)
-    x_convergence = np.arange(0, 5, 0.1)
-    x_recombinationRate  = np.arange(0, 0.5, 0.1)
-
-    # Generate fuzzy membership functions
-    generation_lo = fuzz.trapmf(x_generation, [0, 0, 300,500])
-    generation_md = fuzz.trimf(x_generation, [500, 750, 1000])
-    generation_hi = fuzz.trapmf(x_generation, [1000, 1200, 1500,1500])
-    convergence_lo = fuzz.trapmf(x_convergence, [0, 0, 0.2,0.3])
-    convergence_md = fuzz.trapmf(x_convergence, [0.25, 0.4,0.6, 0.75])
-    convergence_hi = fuzz.trapmf(x_convergence, [0.7, 0.8, 1,1])
-    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.15,0.2])
-    recom_md = fuzz.trapmf(x_recombinationRate, [0.15, 0.2, 0.3, 0.35])
-    recom_hi = fuzz.trapmf(x_recombinationRate, [0.3, 0.4, 0.5,0.5])
-
-    generation_level_lo = fuzz.interp_membership(x_generation, generation_lo, generation_val)
-    generation_level_md = fuzz.interp_membership(x_generation, generation_md, generation_val)
-    generation_level_hi = fuzz.interp_membership(x_generation, generation_hi, generation_val)
-
-    convergence_level_lo = fuzz.interp_membership(x_convergence, convergence_lo, convergence_val)
-    convergence_level_md = fuzz.interp_membership(x_convergence, convergence_md, convergence_val)
-    convergence_level_hi = fuzz.interp_membership(x_convergence, convergence_hi, convergence_val)
-
-    active_rule1 = np.fmax(generation_level_hi, convergence_level_hi)
-    rate_activation_lo = np.fmax(active_rule1, recom_lo)
-
-    active_rule2 = np.fmax(generation_level_md,convergence_level_md)
-    rate_activation_md = np.fmin(active_rule2,recom_md)
-
-    active_rule3 = np.fmin(generation_level_lo,generation_level_hi)
-    rate_activation_hi = np.fmax(active_rule3, generation_level_md)
-    #active_rule4 = np.fmin(generation_level_lo,convergence_level_md)
-
-    #combine_active3_4 = np.fmax(active_rule3, active_rule4)
-    #rate_activation_hi = np.fmin(combine_active3_4, recom_hi)
-
-    aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
-    recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
-
-    #print (active_rule1)
-    #print (active_rule2)
-    #print (active_rule3)
-    #print (active_rule4)
-    #print("recombination rate = "+str(recom_rate))
-    return recom_rate
 
 def debug_check():
     valueArray = [0.205729619072119,0.205729615134341,3.470489004516055,9.036624454433026]
@@ -385,6 +332,60 @@ def main(generation_count,pop_size):
             pop = copy.deepcopy(newPop)
             pop.getPopulationParameterStdDev() #Update the mean
 
-main(1500,100)
+# fuzzy function
+def fuzzy_system(generation_val,convergence_val):
+    # just to ensure that value excceding 1 will be taken care by the code.
+    if (convergence_val>1):
+        convergence_val = 0.99
+
+    x_generation = np.arange(0, 1500, 50)
+    x_convergence = np.arange(0, 1, 0.1)
+    x_recombinationRate  = np.arange(0, 0.5, 0.1)
+
+    # Generate fuzzy membership functions
+    generation_lo = fuzz.trapmf(x_generation, [0, 0, 200,300])
+    generation_md = fuzz.trimf(x_generation, [290, 550, 700])
+    generation_hi = fuzz.trapmf(x_generation, [690, 700, 1500,1500])
+    convergence_lo = fuzz.trapmf(x_convergence, [0, 0, 0.2,0.3])
+    convergence_md = fuzz.trapmf(x_convergence, [0.25, 0.4,0.6, 0.75])
+    convergence_hi = fuzz.trapmf(x_convergence, [0.7, 0.8, 1,1])
+    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.3,0.4])
+    recom_md = fuzz.trapmf(x_recombinationRate, [0.35, 0.5, 0.5, 0.7])
+    recom_hi = fuzz.trapmf(x_recombinationRate, [0.7, 0.9, 1,1])
+
+    generation_level_lo = fuzz.interp_membership(x_generation, generation_lo, generation_val)
+    generation_level_md = fuzz.interp_membership(x_generation, generation_md, generation_val)
+    generation_level_hi = fuzz.interp_membership(x_generation, generation_hi, generation_val)
+
+    convergence_level_lo = fuzz.interp_membership(x_convergence, convergence_lo, convergence_val)
+    convergence_level_md = fuzz.interp_membership(x_convergence, convergence_md, convergence_val)
+    convergence_level_hi = fuzz.interp_membership(x_convergence, convergence_hi, convergence_val)
+
+    # if generation level is high, recombination is low, do nothing to explore
+    rate_activation_lo = np.fmin(generation_level_hi, recom_lo)
+
+    # if generation is medium and convergence is low, recombination is medium: Try to boost the exploration
+    active_rule1 = np.fmin(generation_level_md, fuzz.fuzzy_not(convergence_level_lo))
+    rate_activation_md = np.fmin(active_rule1,recom_md)
+    
+    # if generation is low or medium and convergence is high, give high recombination
+    active_rule2 = np.fmax(fuzz.fuzzy_not(generation_level_hi), convergence_level_hi)
+    rate_activation_hi = np.fmin(active_rule2, recom_hi)
+
+    aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
+
+    try:
+        recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
+    except:
+        recom_rate = 0.25
+
+    return recom_rate
+
+main(1000,100)
 #debug_check()
-#uzzy_system(50,0.8)
+#for gen in range(0,1100,100):
+#    print ("### NEW GEN ###")
+#    for var in range(0,10,2):
+#        fuzzy_system(gen,var/10)
+
+

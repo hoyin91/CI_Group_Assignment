@@ -213,7 +213,9 @@ class Individual:
             self.violation = True
 
 
-def simpleArithmeticCrossover(parent1,parent2):
+def simpleArithmeticCrossover(parent1,parent2,iteration, population):
+    sigma = copy.deepcopy(population.getPopulationStdDev(0))
+    recombinationVar = fuzzy_system(iteration, sigma)
     child1 = copy.deepcopy(parent1)
     child2 = copy.deepcopy(parent2)
 
@@ -256,20 +258,24 @@ def Mutation(parent, iteration, success_rate, population):
 
 # fuzzy function
 def fuzzy_system(generation_val,convergence_val):
+    # just to ensure that value excceding 1 will be taken care by the code.
+    if (convergence_val>1):
+        convergence_val = 0.99
+
     x_generation = np.arange(0, 1500, 50)
     x_convergence = np.arange(0, 1, 0.1)
     x_recombinationRate  = np.arange(0, 0.5, 0.1)
 
     # Generate fuzzy membership functions
-    generation_lo = fuzz.trapmf(x_generation, [0, 0, 300,500])
-    generation_md = fuzz.trimf(x_generation, [500, 750, 1000])
-    generation_hi = fuzz.trapmf(x_generation, [1000, 1200, 1500,1500])
+    generation_lo = fuzz.trapmf(x_generation, [0, 0, 200,300])
+    generation_md = fuzz.trimf(x_generation, [290, 550, 700])
+    generation_hi = fuzz.trapmf(x_generation, [690, 700, 1500,1500])
     convergence_lo = fuzz.trapmf(x_convergence, [0, 0, 0.2,0.3])
     convergence_md = fuzz.trapmf(x_convergence, [0.25, 0.4,0.6, 0.75])
     convergence_hi = fuzz.trapmf(x_convergence, [0.7, 0.8, 1,1])
-    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.15,0.2])
-    recom_md = fuzz.trapmf(x_recombinationRate, [0.15, 0.2, 0.3, 0.35])
-    recom_hi = fuzz.trapmf(x_recombinationRate, [0.3, 0.4, 0.5,0.5])
+    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.3,0.4])
+    recom_md = fuzz.trapmf(x_recombinationRate, [0.35, 0.5, 0.5, 0.7])
+    recom_hi = fuzz.trapmf(x_recombinationRate, [0.7, 0.9, 1,1])
 
     generation_level_lo = fuzz.interp_membership(x_generation, generation_lo, generation_val)
     generation_level_md = fuzz.interp_membership(x_generation, generation_md, generation_val)
@@ -279,20 +285,24 @@ def fuzzy_system(generation_val,convergence_val):
     convergence_level_md = fuzz.interp_membership(x_convergence, convergence_md, convergence_val)
     convergence_level_hi = fuzz.interp_membership(x_convergence, convergence_hi, convergence_val)
 
-    active_rule1 = np.fmax(generation_level_hi, convergence_level_hi)
-    rate_activation_lo = np.fmin(active_rule1, recom_lo)
+    # if generation level is high, recombination is low, do nothing to explore
+    rate_activation_lo = np.fmin(generation_level_hi, recom_lo)
 
-    active_rule2 = np.fmax(generation_level_md,convergence_level_md)
-    rate_activation_md = np.fmin(active_rule2,recom_md)
-
-    active_rule3 = np.fmin(generation_level_lo,convergence_level_md)
-    active_rule4 = np.fmin(active_rule3, np.fmin(generation_level_lo, convergence_level_lo))
-    rate_activation_hi = np.fmin(active_rule4, recom_hi)
+    # if generation is medium and convergence is low, recombination is medium: Try to boost the exploration
+    active_rule1 = np.fmin(generation_level_md, fuzz.fuzzy_not(convergence_level_lo))
+    rate_activation_md = np.fmin(active_rule1,recom_md)
+    
+    # if generation is not high, give high recombination
+    active_rule2 = np.fmax(fuzz.fuzzy_not(generation_level_hi), convergence_level_hi)
+    rate_activation_hi = np.fmin(active_rule2, recom_hi)
 
     aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
-    recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
 
-    #print("recombination rate = "+str(recom_rate))
+    try:
+        recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
+    except:
+        recom_rate = 0.25
+
     return recom_rate
 
 def debug_check():
@@ -318,8 +328,7 @@ def main(generation_count,pop_size):
             parent1 = pop.getParent()
             parent2 = pop.getParent()
 
-            child1,child2 = simpleArithmeticCrossover(parent1,parent2)
-
+            child1,child2 = simpleArithmeticCrossover(parent1,parent2,y,pop)
             # Mutate the child based on the successrate and std dev
             if (y > 0) and (x > 0):
                 child1 = Mutation(child1,y,success/x,successPop)
@@ -346,5 +355,5 @@ def main(generation_count,pop_size):
             pop = copy.deepcopy(newPop)
             pop.getPopulationParameterStdDev() #Update the mean
 
-main(1500,100)
+main(1000,100)
 #debug_check()

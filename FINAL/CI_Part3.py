@@ -49,7 +49,7 @@ class Population:
         # Loop through individuals to find fittest
         fittestInd = self.getIndividual(0)
         for _ in range(self.popSize):
-            if (fittestInd.getFitness() < self.getIndividual(_).getFitness()):
+            if (fittestInd.getFitness() > self.getIndividual(_).getFitness()):
                 fittestInd = self.getIndividual(_)
         
         return fittestInd
@@ -117,7 +117,7 @@ class Individual:
         self.thickness = random.uniform(self.MINTHICKNESS, 10)
         self.innerRadius = random.uniform(self.MININNERRADIUS,50)
         self.length = random.uniform(0.01,self.MAXLENGTH)
-        self.ind = [self.thicknessHead, self.thickness, self.innerRadius, self.length]
+        self.ind = [self.thickness, self.thicknessHead, self.innerRadius, self.length]
 
 
         # check if newly generated function is within constraint or not
@@ -133,7 +133,7 @@ class Individual:
         self.thickness = random.uniform(self.MINTHICKNESS, 10)
         self.innerRadius = random.uniform(self.MININNERRADIUS,50)
         self.length = random.uniform(0.01,self.MAXLENGTH)
-        self.ind = [self.thicknessHead, self.thickness, self.innerRadius, self.length]
+        self.ind = [self.thickness, self.thicknessHead, self.innerRadius, self.length]
         return
 
     # get the gene array size
@@ -152,7 +152,7 @@ class Individual:
     def setIndividualGene(self, valueArray):
         for k,v in enumerate(valueArray):
             self.setParticularGene(k,v)
-        self.ind = [self.thicknessHead, self.thickness, self.innerRadius, self.length]
+        self.ind = [self.thickness, self.thicknessHead, self.innerRadius, self.length]
 
     def setParticularGene(self,index,value):
         if index == 0:
@@ -164,7 +164,7 @@ class Individual:
         elif index == 3:
             self.length = value
 
-        self.ind = [self.thicknessHead, self.thickness, self.innerRadius, self.length]
+        self.ind = [self.thickness, self.thicknessHead, self.innerRadius, self.length]
 
     def getThickness(self):
         if self.thickness < self.MINTHICKNESS:
@@ -187,13 +187,13 @@ class Individual:
         return self.length
 
     def getFitness(self):
-        self.fitness = 0.0
+        self.fitness = 99999
         self.checkConstraint()
 
         # if any parameter violate, return 9999 directly
         if not self.violation:
             a=(0.6224*self.getThickness()*self.getInnerRadius()*self.getLength())
-            b=(1.7781*self.getThicknessHead()*self.getInnerRadius()*self.getThicknessHead())
+            b=(1.7781*self.getInnerRadius()*self.getInnerRadius()*self.getThicknessHead())
             c=(3.1661*math.pow(self.getThickness(),2)*self.getLength())
             d=(19.84*math.pow(self.getThickness(),2)*self.getInnerRadius())
             self.fitness = (a + b + c + d)
@@ -202,26 +202,28 @@ class Individual:
 
     def checkConstraint(self):
         self.violation = False
-        PI = 3.141592557
         ts=self.getThickness()
         th=self.getThicknessHead()
         L=self.getLength()
         R=self.getInnerRadius()
 
-        if (-ts + (0.0193*R)) > 0 :
-            self.violation=True
-            #print ("fail rule 1")
-        elif (-th + (0.00954*R)) > 0:
-            self.violation=True
-            #print ("fail rule 2")
-        elif ((-PI*math.pow(R,2)*L)-(((4*PI)/3)*math.pow(R,3))+1296000) > 0:
-            self.violation=True
-            #print ("fail rule 3")
-        elif (L - 240) > 0:
-            self.violation = True
-            #print ("fail rule 4")
+        g1 = (-ts + (0.0193*R))
+        g2 = (-th + (0.00954*R))
+        g3 = ((-math.pi*math.pow(R,2)*L)-(((4*math.pi)/3)*math.pow(R,3))+1296000)
+        g4 = (L - 240) 
 
-def simpleArithmeticCrossover(parent1,parent2):
+        if  g1 > 0 :
+            self.violation=True
+        elif g2 > 0:
+            self.violation=True
+        elif g3 > 0:
+            self.violation=True
+        elif g4 > 0:
+            self.violation = True
+
+def simpleArithmeticCrossover(parent1,parent2,iteration, population):
+    sigma = copy.deepcopy(population.getPopulationStdDev(0))
+    recombinationVar = fuzzy_system(iteration, sigma)
     child1 = copy.deepcopy(parent1)
     child2 = copy.deepcopy(parent2)
 
@@ -265,20 +267,24 @@ def Mutation(parent, iteration, success_rate, population):
 
 # fuzzy function
 def fuzzy_system(generation_val,convergence_val):
+    # just to ensure that value excceding 1 will be taken care by the code.
+    if (convergence_val>1):
+        convergence_val = 0.99
+
     x_generation = np.arange(0, 1500, 50)
     x_convergence = np.arange(0, 1, 0.1)
     x_recombinationRate  = np.arange(0, 0.5, 0.1)
 
     # Generate fuzzy membership functions
-    generation_lo = fuzz.trapmf(x_generation, [0, 0, 300,500])
-    generation_md = fuzz.trimf(x_generation, [500, 750, 1000])
-    generation_hi = fuzz.trapmf(x_generation, [1000, 1200, 1500,1500])
+    generation_lo = fuzz.trapmf(x_generation, [0, 0, 200,300])
+    generation_md = fuzz.trimf(x_generation, [290, 550, 700])
+    generation_hi = fuzz.trapmf(x_generation, [690, 700, 1500,1500])
     convergence_lo = fuzz.trapmf(x_convergence, [0, 0, 0.2,0.3])
     convergence_md = fuzz.trapmf(x_convergence, [0.25, 0.4,0.6, 0.75])
     convergence_hi = fuzz.trapmf(x_convergence, [0.7, 0.8, 1,1])
-    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.15,0.2])
-    recom_md = fuzz.trapmf(x_recombinationRate, [0.15, 0.2, 0.3, 0.35])
-    recom_hi = fuzz.trapmf(x_recombinationRate, [0.3, 0.4, 0.5,0.5])
+    recom_lo = fuzz.trapmf(x_recombinationRate, [0, 0, 0.3,0.4])
+    recom_md = fuzz.trapmf(x_recombinationRate, [0.35, 0.5, 0.5, 0.7])
+    recom_hi = fuzz.trapmf(x_recombinationRate, [0.7, 0.9, 1,1])
 
     generation_level_lo = fuzz.interp_membership(x_generation, generation_lo, generation_val)
     generation_level_md = fuzz.interp_membership(x_generation, generation_md, generation_val)
@@ -288,24 +294,28 @@ def fuzzy_system(generation_val,convergence_val):
     convergence_level_md = fuzz.interp_membership(x_convergence, convergence_md, convergence_val)
     convergence_level_hi = fuzz.interp_membership(x_convergence, convergence_hi, convergence_val)
 
-    active_rule1 = np.fmax(generation_level_hi, convergence_level_hi)
-    rate_activation_lo = np.fmin(active_rule1, recom_lo)
+    # if generation level is high, recombination is low, do nothing to explore
+    rate_activation_lo = np.fmin(generation_level_hi, recom_lo)
 
-    active_rule2 = np.fmax(generation_level_md,convergence_level_md)
-    rate_activation_md = np.fmin(active_rule2,recom_md)
-
-    active_rule3 = np.fmin(generation_level_lo,convergence_level_md)
-    active_rule4 = np.fmin(active_rule3, np.fmin(generation_level_lo, convergence_level_lo))
-    rate_activation_hi = np.fmin(active_rule4, recom_hi)
+    # if generation is medium and convergence is low, recombination is medium: Try to boost the exploration
+    active_rule1 = np.fmin(generation_level_md, fuzz.fuzzy_not(convergence_level_lo))
+    rate_activation_md = np.fmin(active_rule1,recom_md)
+    
+    # if generation is low or medium and convergence is high, give high recombination
+    active_rule2 = np.fmax(fuzz.fuzzy_not(generation_level_hi), convergence_level_hi)
+    rate_activation_hi = np.fmin(active_rule2, recom_hi)
 
     aggregated = np.fmax(rate_activation_lo, np.fmax(rate_activation_md, rate_activation_hi))
-    recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
 
-    #print("recombination rate = "+str(recom_rate))
+    try:
+        recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
+    except:
+        recom_rate = 0.25
+
     return recom_rate
 
 def debug_check():
-    valueArray = [0.812500000000000,0.437500000000000,42.098445593492706,176.6365958720004]
+    valueArray = [0.437500000000000,0.812500000000000, 42.098445593492706,176.6365958720004]
     #valueArray = [4.751114909557465, 9.861871448799207, 47.326035144970824, 193.25824076155143]
     dut = Individual()
     dut.setIndividualGene(valueArray)
@@ -323,13 +333,12 @@ def main(generation_count,pop_size):
         fittestoftheloop = copy.deepcopy(pop.getFittest())
         newPop.insertPopulation(fittestoftheloop)
         print ("Iteration: {} Fitness: {} Array: {} stddev: {}".format(y, fittestoftheloop.getFitness(), fittestoftheloop.getIndividualGeneArray(), pop.getPopulationParameterStdDev()))
-        os.system("echo {} >> result_2.txt".format(fittestoftheloop.getFitness()))
+        os.system("echo {} >> result_3.txt".format(fittestoftheloop.getFitness()))
         for x in range(int(popSize/2)):
             parent1 = pop.getParent()
             parent2 = pop.getParent()
 
-            child1,child2 = simpleArithmeticCrossover(parent1,parent2)
-
+            child1,child2 = simpleArithmeticCrossover(parent1,parent2,y,pop)
             # Mutate the child based on the successrate and std dev
             if (y > 0) and (x > 0):
                 child1 = Mutation(child1,y,success/x,successPop)
@@ -356,5 +365,5 @@ def main(generation_count,pop_size):
             pop = copy.deepcopy(newPop)
             pop.getPopulationParameterStdDev() #Update the mean
 
-#main(10,100)
-debug_check()
+main(1000,100)
+#debug_check()
