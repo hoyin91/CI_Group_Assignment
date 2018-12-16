@@ -106,9 +106,10 @@ class Population:
         for _ in range(self.popSize):
             ind_fitness_array.append(self.getIndividual(_).getFitness())
         else:
-            data_to_write = str(np.std(ind_fitness_array)) + "\t" + str(np.mean(ind_fitness_array)) + "\t" +str(max(ind_fitness_array))
-            os.system("echo {} >> P3_stat.txt".format(data_to_write))
-            print (np.std(ind_fitness_array), np.mean(ind_fitness_array), max(ind_fitness_array))
+            f = open(r'P3_stat.txt', 'a+')
+            f.writelines("{}\t{}\t{}\n".format(np.std(ind_fitness_array), np.mean(ind_fitness_array), max(ind_fitness_array)))
+            f.close()
+            #print (np.std(ind_fitness_array), np.mean(ind_fitness_array), max(ind_fitness_array))
 
 class Individual:
 
@@ -223,8 +224,9 @@ class Individual:
 
         # write to file if and only if call by user
         if write_to_file:
-            data_to_write = "{} {} {} {}".format(g1, g2, g3, g4)
-            os.system("echo {} >> P3_constraints.txt".format(data_to_write))
+            f = open(r'P3_constraints.txt', 'a+')
+            f.writelines("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(ts, th, L, R, g1, g2, g3, g4))
+            f.close()
 
         if g1 > 0 :
             self.violation=True
@@ -337,52 +339,55 @@ def debug_check():
     print (dut.getFitness())
 
 # Main function at here!
-def main(generation_count,pop_size):
+def main(test_run, generation_count,pop_size):
     popSize = pop_size
-    pop = Population(popSize,1)
-    for y in range(generation_count):
-        newPop = Population(popSize,0)
-        successPop = Population(0,0)
-        success = 0.0
-        fittestoftheloop = copy.deepcopy(pop.getFittest())
-        newPop.insertPopulation(fittestoftheloop)
-        print ("Iteration: {} Fitness: {} Array: {} stddev: {}".format(y, fittestoftheloop.getFitness(), fittestoftheloop.getIndividualGeneArray(), pop.getPopulationParameterStdDev()))
-        os.system("echo {} >> result_3.txt".format(fittestoftheloop.getFitness()))
-        for x in range(int(popSize/2)):
-            parent1 = pop.getParent()
-            parent2 = pop.getParent()
+    for test in range(test_run):
+        pop = Population(popSize,1)
+        for y in range(generation_count):
+            newPop = Population(popSize,0)
+            successPop = Population(0,0)
+            success = 0.0
+            fittestoftheloop = copy.deepcopy(pop.getFittest())
+            newPop.insertPopulation(fittestoftheloop)
+            # print ("Iteration: {} Fitness: {} Array: {} stddev: {}".format(y, fittestoftheloop.getFitness(), fittestoftheloop.getIndividualGeneArray(), pop.getPopulationParameterStdDev()))
+            os.system("echo {} >> result_3_converge.txt".format(fittestoftheloop.getFitness()))
+            for x in range(int(popSize/2)):
+                parent1 = pop.getParent()
+                parent2 = pop.getParent()
 
-            child1,child2 = simpleArithmeticCrossover(parent1,parent2,y,pop)
-            # Mutate the child based on the successrate and std dev
-            if (y > 0) and (x > 0):
-                child1 = Mutation(child1,y,success/x,successPop)
-                child2 = Mutation(child2,y,success/x,successPop)
-            else:
-                child1 = parent1
-                child2 = parent2
+                child1,child2 = simpleArithmeticCrossover(parent1,parent2,y,pop)
+                # Mutate the child based on the successrate and std dev
+                if (y > 0) and (x > 0):
+                    child1 = Mutation(child1,y,success/x,successPop)
+                    child2 = Mutation(child2,y,success/x,successPop)
+                else:
+                    child1 = parent1
+                    child2 = parent2
 
-            # check if child is fitter than its parent or not
-            # if yes, increase the counter for the prob success mutation
-            if (child1.getFitness() < parent1.getFitness()):
-                newPop.insertPopulation(child1)
-                success += 1
-            else:
-                newPop.insertPopulation(parent1)
+                # check if child is fitter than its parent or not
+                # if yes, increase the counter for the prob success mutation
+                if (child1.getFitness() < parent1.getFitness()):
+                    newPop.insertPopulation(child1)
+                    success += 1
+                else:
+                    newPop.insertPopulation(parent1)
 
-            if (child2.getFitness() < parent2.getFitness()):
-                newPop.insertPopulation(child2)
-                success += 1
+                if (child2.getFitness() < parent2.getFitness()):
+                    newPop.insertPopulation(child2)
+                    success += 1
+                else:
+                    newPop.insertPopulation(parent2)
             else:
-                newPop.insertPopulation(parent2)
+                # replace the entire population with newly generated children'
+                pop = copy.deepcopy(newPop)
+                pop.getPopulationParameterStdDev() #Update the mean
         else:
-            # replace the entire population with newly generated children'
-            pop = copy.deepcopy(newPop)
-            pop.getPopulationParameterStdDev() #Update the mean
+            # write the constraint to a file
+            pop.getFittest().checkConstraint(True)
             pop.getPopulationFitnessDetail()
+            os.system("echo {} >> result_final_3.txt".format(fittestoftheloop.getFitness()))
     else:
-        # write the constraint to a file
-        pop.getFittest().checkConstraint(True)
+        print("Completed for {} run".format(test_run))
 
-
-main(1000,100)
+main(100,700,100)
 #debug_check()

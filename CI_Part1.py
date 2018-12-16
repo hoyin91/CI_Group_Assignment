@@ -107,12 +107,10 @@ class Population:
         for _ in range(self.popSize):
             ind_fitness_array.append(self.getIndividual(_).getFitness())
         else:
-            #data_to_write = str(np.std(ind_fitness_array)) + "\t" + str(np.mean(ind_fitness_array)) + "\t" +str(max(ind_fitness_array))
-            #os.system("echo {} >> P1_stat.txt".format(data_to_write))
             f = open(r'P1_stat.txt', 'a+')
             f.writelines("{}\t{}\t{}\n".format(np.std(ind_fitness_array), np.mean(ind_fitness_array), max(ind_fitness_array)))
             f.close()
-            print (np.std(ind_fitness_array), np.mean(ind_fitness_array), max(ind_fitness_array))
+            #print (np.std(ind_fitness_array), np.mean(ind_fitness_array), max(ind_fitness_array))
 
 
 class Individual:
@@ -244,8 +242,6 @@ class Individual:
 
         # write to file if and only if call by user
         if write_to_file:
-            #data_to_write = "{} {}  {}  {}  {}  {}  {}".format(g1, g2, g3, g4, g5, g6, g7)
-            #os.system("echo {} >> P1_constraints.txt".format(data_to_write))
             f = open(r'P1_constraints.txt', 'a+')
             f.writelines("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(h, w, L, d, g1, g2, g3, g4, g5, g6, g7))
             f.close()
@@ -329,8 +325,7 @@ def main(test_run, generation_count,pop_size):
             fittestoftheloop = copy.deepcopy(pop.getFittest())
             newPop.insertPopulation(fittestoftheloop)
             #print ("Iteration: {} Fitness: {} Array: {} stddev: {}".format(y, fittestoftheloop.getFitness(), fittestoftheloop.getIndividualGeneArray(), pop.getPopulationParameterStdDev()))
-            
-            os.system("echo {} >> result_1.txt".format(fittestoftheloop.getFitness()))
+            os.system("echo {} >> result_1_converge.txt".format(fittestoftheloop.getFitness()))
             for x in range(int(popSize/2)):
                 parent1 = pop.getParent()
                 parent2 = pop.getParent()
