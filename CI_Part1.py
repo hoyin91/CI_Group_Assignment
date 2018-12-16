@@ -405,6 +405,7 @@ def fuzzy_system(generation_val,convergence_val):
     try:
         recom_rate = fuzz.defuzz(x_recombinationRate, aggregated, 'centroid')
     except:
+        # if the member function is empty, just set the value to default low only
         recom_rate = 0.25
 
     return recom_rate
